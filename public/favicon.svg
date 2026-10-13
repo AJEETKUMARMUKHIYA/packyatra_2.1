@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09101d" />
+      <stop offset="100%" stop-color="#172554" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded App Tile -->
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+
+  <!-- Official PackYatra Pin Emblem & Red House -->
+  <g transform="translate(18, 12) scale(1.0)" filter="url(#shadow)">
+    <!-- Blue Pin Dome -->
+    <path d="M 46 12 C 70 12 88 30 88 54 C 88 71 73 90 46 114 C 19 90 4 71 4 54 C 4 30 22 12 46 12 Z" fill="#2F74EE"/>
+    
+    <!-- Red House & Lower Pin Apex -->
+    <path d="M 46 42 L 76 68 L 76 82 L 46 114 L 16 82 L 16 68 Z" fill="#EF2329"/>
+    
+    <!-- White Facet Division Lines -->
+    <line x1="22" y1="28" x2="46" y2="52" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="28" x2="46" y2="52" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="5" y1="54" x2="28" y2="54" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="87" y1="54" x2="64" y2="54" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="16,68 46,42 76,68" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- White Chimney -->
+    <rect x="27" y="47" width="4.5" height="10" fill="#ffffff"/>
+    
+    <!-- Doorway Frame -->
+    <rect x="40" y="72" width="12" height="26" fill="#ffffff" rx="1.5"/>
+    <rect x="43" y="75" width="6" height="23" fill="#EF2329" rx="1"/>
+  </g>
+</svg>

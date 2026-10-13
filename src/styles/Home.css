@@ -1,0 +1,126 @@
+/* ===============================
+   CORPORATE HERO & FORM LAYOUT
+=============================== */
+.main-content {
+  margin-right: 0 !important;
+}
+
+.hero-grid-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .hero-grid-container {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 48px;
+  }
+}
+
+.fixed-form {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  z-index: 10;
+}
+
+/* Suggestions Dropdown */
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  z-index: 1000;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.suggestion-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #0045e6 !important;
+}
+
+/* ===============================
+   CORPORATE REVIEWS & TWO-COL GRID
+=============================== */
+.reviews-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.reviews-grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 992px) {
+  .reviews-two-col {
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+  }
+}
+
+@media (min-width: 640px) {
+  .reviews-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Datepicker tweaks */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.react-datepicker__input-container {
+  width: 100%;
+}
+.react-datepicker__calendar-icon,
+.react-datepicker__view-calendar-icon svg,
+.date-input::-webkit-calendar-picker-indicator,
+.date-input::-webkit-inner-spin-button,
+.date-input::-webkit-clear-button,
+.react-datepicker__input-container::before,
+.react-datepicker__input-container::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  -webkit-appearance: none !important;
+}
+.date-input {
+  width: 100%;
+  outline: none;
+}
+
