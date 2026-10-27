@@ -1,8 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { Button, Dialog, DialogContent } from "@mui/material";
-import { Phone, Mail, LogIn, Truck, MessageSquare } from "lucide-react";
-import axiosClient from "../AxiosClient.jsx";
+import { Dialog, DialogContent } from "@mui/material";
+import { 
+  Phone, 
+  Mail, 
+  LogIn, 
+  Truck, 
+  MessageSquare, 
+  ChevronDown, 
+  Building2, 
+  Home as HomeIcon, 
+  Car, 
+  Warehouse, 
+  Calculator, 
+  ClipboardList, 
+  Star, 
+  HelpCircle, 
+  ArrowRight, 
+  ShieldCheck,
+  X,
+  Menu,
+  Clock,
+  Sparkles,
+  PawPrint
+} from "lucide-react";
 import TrackShipment from "../pages/TrackShipment.jsx";
 import OtpLogin from "../components/OtpLogin.jsx";
 import UserDropdown from "./UserDropdown.jsx";
@@ -12,36 +33,77 @@ import "../styles/Header.css";
 
 const Header = ({ onLoginStatusChange }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef(null);
+
+  /* ======================
+     SCROLL EFFECT
+  ====================== */
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   /* ======================
      AUTO CLOSE ON ROUTE CHANGE
   ====================== */
   useEffect(() => {
     setMenuOpen(false);
+    setServicesDropdownOpen(false);
+    setMobileServicesOpen(false);
     document.body.style.overflow = "auto";
   }, [location.pathname]);
 
   /* ======================
-     BODY SCROLL LOCK
+     BODY SCROLL LOCK FOR MOBILE MENU
   ====================== */
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "auto";
-    return () => (document.body.style.overflow = "auto");
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [menuOpen]);
 
   /* ======================
      ESC KEY CLOSE
   ====================== */
   useEffect(() => {
-    const esc = (e) => e.key === "Escape" && setMenuOpen(false);
+    const esc = (e) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setServicesDropdownOpen(false);
+      }
+    };
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
+  }, []);
+
+  /* ======================
+     CLICK OUTSIDE SERVICES DROPDOWN
+  ====================== */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setServicesDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /* ======================
@@ -49,7 +111,9 @@ const Header = ({ onLoginStatusChange }) => {
   ====================== */
   useEffect(() => {
     const resize = () => {
-      if (window.innerWidth >= 900) setMenuOpen(false);
+      if (window.innerWidth >= 1024) {
+        setMenuOpen(false);
+      }
     };
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
@@ -61,7 +125,6 @@ const Header = ({ onLoginStatusChange }) => {
   useEffect(() => {
     const loadUser = () => {
       const userInfo = getUserInfo();
-      
       if (userInfo) {
         setUser(userInfo);
         onLoginStatusChange?.(true);
@@ -72,8 +135,6 @@ const Header = ({ onLoginStatusChange }) => {
     };
 
     loadUser();
-    
-    // Listen for login/logout events
     window.addEventListener("user-login", loadUser);
     window.addEventListener("user-logout", loadUser);
     window.addEventListener("storage", loadUser);
@@ -90,10 +151,7 @@ const Header = ({ onLoginStatusChange }) => {
   ====================== */
   const openLogin = () => {
     setMenuOpen(false);
-    
-    // Check if already logged in
     if (isOtpValid()) {
-      // Already logged in, no need to show modal
       const userInfo = getUserInfo();
       if (userInfo && !user) {
         setUser(userInfo);
@@ -101,7 +159,6 @@ const Header = ({ onLoginStatusChange }) => {
       }
       return;
     }
-    
     setIsLoginModalOpen(true);
   };
 
@@ -110,139 +167,494 @@ const Header = ({ onLoginStatusChange }) => {
     setIsTrackModalOpen(true);
   };
 
-  const handleLogout = () => {
-    clearLoginData();
+  const handleLogoutFromDropdown = () => {
     setUser(null);
     onLoginStatusChange?.(false);
-    navigate("/");
-    setMenuOpen(false);
-  };
-const handleLogoutFromDropdown = () => {
-    setUser(null);
-    onLoginStatusChange?.(false);
-    // UserDropdown handles the actual logout logic (clear localStorage, etc.)
-    // We just need to update our local state here
   };
 
- 
-  /* ======================
-     JSX
-  ====================== */
+  const scrollToSection = (sectionId) => {
+    setMenuOpen(false);
+    setServicesDropdownOpen(false);
+    
+    if (location.pathname !== "/") {
+      navigate(`/#${sectionId}`);
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 180);
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  const handleQuoteClick = () => {
+    setMenuOpen(false);
+    if (location.pathname !== "/") {
+      navigate("/#home");
+      setTimeout(() => {
+        const formEl = document.querySelector(".fixed-form") || document.getElementById("home");
+        if (formEl) {
+          formEl.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 180);
+    } else {
+      const formEl = document.querySelector(".fixed-form") || document.getElementById("home");
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
+  const servicesList = [
+    {
+      id: "commercial",
+      title: "Corporate Office Relocation",
+      desc: "Zero-downtime workstation de-racking, server moving, and full IT relocation.",
+      tag: "Enterprise SLA",
+      icon: Building2,
+      color: "#2563eb"
+    },
+    {
+      id: "shifting",
+      title: "Executive Household Shifting",
+      desc: "White-glove multi-layer packing, modular furniture assembly, and art care.",
+      tag: "White-Glove",
+      icon: HomeIcon,
+      color: "#0284c7"
+    },
+    {
+      id: "pet-relocation",
+      title: "Safe Pet Relocation",
+      desc: "Veterinary-assisted, climate-controlled, stress-free domestic pet transit.",
+      tag: "Vet-Certified",
+      icon: PawPrint,
+      color: "#ea580c"
+    },
+    {
+      id: "vehicles",
+      title: "Executive Vehicle Transport",
+      desc: "Hydraulic enclosed car carriers and scratch-proof multi-tier bike transport.",
+      tag: "Hydraulic Fleet",
+      icon: Car,
+      color: "#0d9488"
+    },
+    {
+      id: "storage",
+      title: "Commercial Warehousing",
+      desc: "Climate-controlled 24/7 CCTV surveillance storage vaults & digital inventory.",
+      tag: "24/7 Monitored",
+      icon: Warehouse,
+      color: "#4f46e5"
+    },
+    {
+      id: "intracity",
+      title: "Same-Day Intra-City Transit",
+      desc: "Dedicated container trucks for fast-track metropolitan house and item shifting.",
+      tag: "Same-Day",
+      icon: Truck,
+      color: "#059669"
+    }
+  ];
+
   return (
     <header className="site-header">
-      {/* TOP BAR */}
+      {/* ========================================================
+          ZONE 1: TOP CORPORATE ANNOUNCEMENT & CONTACT BAR
+         ======================================================== */}
       <div className="top-bar">
         <div className="top-bar-container">
+          {/* Left: Contact Info & Verified Badge */}
           <div className="contact-top">
-            <span className="contact-item">
-              <Phone size={13} className="contact-icon" />
-              <a href="tel:+919071535535">+91 90715 35535</a>
+            <span className="trust-pill">
+              <ShieldCheck size={12} className="trust-icon" />
+              <span>Verified Pan-India Carrier</span>
             </span>
-            <span className="contact-divider">•</span>
+            <span className="contact-divider">/</span>
             <span className="contact-item">
-              <Mail size={13} className="contact-icon" />
-              <a href="mailto:info@packyatra.com">info@packyatra.com</a>
+              <Phone size={12} className="contact-icon" />
+              <a href="tel:+919071535535" title="Click to call PackYatra 24/7 Hotline">+91 90715 35535</a>
+            </span>
+            <span className="contact-divider">/</span>
+            <span className="contact-item">
+              <Mail size={12} className="contact-icon" />
+              <a href="mailto:info@packyatra.com" title="Email PackYatra team">info@packyatra.com</a>
             </span>
           </div>
+
+          {/* Right: Operational Status & User Dropdown */}
           <div className="top-bar-right">
+            <div className="hotline-badge">
+              <Clock size={11} className="clock-icon" />
+              <span>24/7 Dispatch Desk</span>
+            </div>
+            <a 
+              href="https://wa.me/9071535535" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="topbar-wa-link"
+              title="Message PackYatra on WhatsApp"
+            >
+              <MessageSquare size={11} />
+              <span>WhatsApp</span>
+            </a>
             <UserDropdown onLogout={handleLogoutFromDropdown} />
           </div>
         </div>
       </div>
 
-      {/* HEADER */}
-      <div className="header">
+      {/* ========================================================
+          ZONE 2: MAIN FLOATING / GLASS HEADER (ATTRACTIVE HOME MENU)
+         ======================================================== */}
+      <div className={`header ${scrolled ? "header-scrolled" : ""}`}>
         <div className="header-container">
+          
           {/* LOGO */}
-          <div className="logo-container" onClick={() => navigate("/")} style={{ cursor: "pointer" }} title="PackYatra Relocation">
-            <PackYatraLogo height={48} />
+          <div 
+            className="logo-container" 
+            onClick={() => navigate("/")} 
+            title="PackYatra Relocation"
+          >
+            <PackYatraLogo height={44} />
           </div>
 
-          {/* DESKTOP NAV */}
-          <nav className="desktop-nav">
-            <NavLink to="/" end className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-              Home
+          {/* DESKTOP NAVIGATION MENU */}
+          <nav className="desktop-nav" aria-label="Main Navigation">
+            {/* Home Link */}
+            <NavLink 
+              to="/" 
+              end 
+              className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+            >
+              <span>Home</span>
             </NavLink>
-            <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-              About
+
+            {/* Services Dropdown */}
+            <div 
+              className="nav-item-dropdown" 
+              ref={dropdownRef}
+              onMouseEnter={() => setServicesDropdownOpen(true)}
+              onMouseLeave={() => setServicesDropdownOpen(false)}
+            >
+              <button 
+                type="button"
+                className={`nav-link dropdown-trigger ${servicesDropdownOpen ? "open" : ""}`}
+                onClick={() => setServicesDropdownOpen(!servicesDropdownOpen)}
+                aria-expanded={servicesDropdownOpen}
+              >
+                <span>Services</span>
+                <ChevronDown size={14} className={`dropdown-chevron ${servicesDropdownOpen ? "rotate" : ""}`} />
+              </button>
+
+              {/* Mega Dropdown Panel */}
+              {servicesDropdownOpen && (
+                <div className="services-mega-menu">
+                  <div className="mega-menu-header">
+                    <div className="mega-title">Our Relocation Services</div>
+                    <span className="mega-sub">Safe · On-Time · Insured Pan-India Shifting</span>
+                  </div>
+
+                  <div className="mega-grid">
+                    {servicesList.map((srv) => {
+                      const Icon = srv.icon;
+                      return (
+                        <div 
+                          key={srv.id} 
+                          className="mega-card"
+                          onClick={() => scrollToSection("services")}
+                        >
+                          <div className="mega-icon-box" style={{ color: srv.color, background: `${srv.color}14` }}>
+                            <Icon size={18} />
+                          </div>
+                          <div className="mega-card-content">
+                            <div className="mega-card-title-row">
+                              <span className="mega-card-title">{srv.title}</span>
+                              <span className="mega-tag">{srv.tag}</span>
+                            </div>
+                            <p className="mega-card-desc">{srv.desc}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mega-menu-footer">
+                    <div className="mega-footer-text">
+                      <strong>Need tailored corporate moving?</strong> Speak to our relocation specialists.
+                    </div>
+                    <button 
+                      className="mega-cta-btn"
+                      onClick={() => scrollToSection("services")}
+                    >
+                      <span>Explore All Solutions</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Cost Estimator */}
+            <button 
+              type="button"
+              className="nav-link nav-btn-link"
+              onClick={() => scrollToSection("estimator")}
+              title="Instant Moving Cost Calculator"
+            >
+              <Calculator size={14} className="nav-icon-subtle" />
+              <span>Cost Estimator</span>
+            </button>
+
+            {/* Moving Planner */}
+            <button 
+              type="button"
+              className="nav-link nav-btn-link"
+              onClick={() => scrollToSection("planner")}
+              title="Interactive 4-Week Moving Checklist"
+            >
+              <ClipboardList size={14} className="nav-icon-subtle" />
+              <span>Moving Checklist</span>
+            </button>
+
+            {/* FAQ */}
+            <NavLink 
+              to="/faq" 
+              className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+              title="Frequently Asked Questions & Moving Guide"
+            >
+              <HelpCircle size={14} className="nav-icon-subtle" />
+              <span>FAQ</span>
             </NavLink>
-            <NavLink to="/contact" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-              Contact
+
+            {/* About */}
+            <NavLink 
+              to="/about" 
+              className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+            >
+              <span>About</span>
+            </NavLink>
+
+            {/* Contact */}
+            <NavLink 
+              to="/contact" 
+              className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+            >
+              <span>Contact</span>
             </NavLink>
           </nav>
 
           {/* DESKTOP ACTIONS */}
           <div className="header-actions">
-            <button className="header-track-btn" onClick={openTrackShipment} title="Track your active consignment">
+            {/* Track Shipment Pill Button */}
+            <button 
+              className="header-track-btn" 
+              onClick={openTrackShipment} 
+              title="Track your active consignment status"
+            >
               <Truck size={14} />
               <span>Track Move</span>
             </button>
+
+            {/* Primary Instant Quote CTA */}
+            <button 
+              className="header-quote-btn"
+              onClick={handleQuoteClick}
+              title="Get instant transparent moving quote"
+            >
+              <Sparkles size={13} className="sparkle-icon" />
+              <span>Get Free Quote</span>
+            </button>
+
+            {/* Login / Profile State */}
             {!user ? (
-              <button className="header-login-btn" onClick={openLogin}>
+              <button className="header-login-btn" onClick={openLogin} title="User Account Login">
                 <LogIn size={14} />
-                <span>Login / Signup</span>
+                <span>Sign In</span>
               </button>
-            ) : (
-              <span className="user-logged-badge">
-                <span className="status-dot"></span>
-                Logged In
-              </span>
-            )}
+            ) : null}
           </div>
 
-          {/* HAMBURGER */}
+          {/* HAMBURGER BUTTON (MOBILE) */}
           <button
             className={`mobile-menu-btn ${menuOpen ? "open" : ""}`}
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle Menu"
+            aria-label="Toggle Navigation Menu"
           >
-            <span />
-            <span />
-            <span />
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
-        {/* OVERLAY */}
+        {/* OVERLAY FOR MOBILE DRAWER */}
         {menuOpen && <div className="menu-overlay" onClick={() => setMenuOpen(false)} />}
 
-        {/* MOBILE MENU */}
+        {/* MOBILE NAVIGATION DRAWER */}
         <nav className={`nav-container ${menuOpen ? "active" : ""}`}>
           <div className="mobile-menu-header">
-            <div className="logo-container" onClick={() => { setMenuOpen(false); navigate("/"); }} style={{ cursor: "pointer" }}>
-              <PackYatraLogo height={42} />
+            <div 
+              className="logo-container" 
+              onClick={() => { setMenuOpen(false); navigate("/"); }} 
+              style={{ cursor: "pointer" }}
+            >
+              <PackYatraLogo height={38} />
             </div>
+            <button 
+              className="mobile-close-btn" 
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <ul className="mobile-nav-links">
-            <li>
-              <NavLink to="/" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? "active" : ""}>
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/about" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? "active" : ""}>
-                About Us
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/contact" onClick={() => setMenuOpen(false)} className={({ isActive }) => isActive ? "active" : ""}>
-                Contact Support
-              </NavLink>
-            </li>
-            <li className="whatsapp-li">
-              <a href="https://wa.me/9071535535" target="_blank" rel="noreferrer" className="whatsapp-cta">
-                <MessageSquare size={16} />
-                <span>Continue on WhatsApp</span>
-              </a>
-            </li>
-          </ul>
 
+          {/* Mobile Quick Action Strip */}
+          <div className="mobile-quick-strip">
+            <a href="tel:+919071535535" className="quick-action-pill call">
+              <Phone size={13} />
+              <span>Call Hotline</span>
+            </a>
+            <a 
+              href="https://wa.me/9071535535" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="quick-action-pill whatsapp"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </a>
+            <button onClick={openTrackShipment} className="quick-action-pill track">
+              <Truck size={13} />
+              <span>Track</span>
+            </button>
+          </div>
+
+          {/* Mobile Navigation Links */}
+          <div className="mobile-nav-scroll">
+            <ul className="mobile-nav-links">
+              <li>
+                <NavLink 
+                  to="/" 
+                  end
+                  onClick={() => setMenuOpen(false)} 
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                >
+                  <HomeIcon size={16} />
+                  <span>Home</span>
+                </NavLink>
+              </li>
+
+              {/* Expandable Services Accordion */}
+              <li className="mobile-accordion-item">
+                <button 
+                  className="mobile-accordion-toggle"
+                  onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                >
+                  <div className="accordion-label">
+                    <Building2 size={16} />
+                    <span>Relocation Services</span>
+                  </div>
+                  <ChevronDown size={15} className={`chevron ${mobileServicesOpen ? "rotate" : ""}`} />
+                </button>
+
+                {mobileServicesOpen && (
+                  <div className="mobile-services-list">
+                    {servicesList.map((srv) => {
+                      const Icon = srv.icon;
+                      return (
+                        <div 
+                          key={srv.id}
+                          className="mobile-service-subitem"
+                          onClick={() => scrollToSection("services")}
+                        >
+                          <div className="subitem-icon" style={{ color: srv.color }}>
+                            <Icon size={14} />
+                          </div>
+                          <div className="subitem-info">
+                            <span className="subitem-title">{srv.title}</span>
+                            <span className="subitem-tag">{srv.tag}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </li>
+
+              <li>
+                <button 
+                  type="button" 
+                  className="mobile-link-btn"
+                  onClick={() => scrollToSection("estimator")}
+                >
+                  <Calculator size={16} />
+                  <span>Instant Cost Estimator</span>
+                </button>
+              </li>
+
+              <li>
+                <button 
+                  type="button" 
+                  className="mobile-link-btn"
+                  onClick={() => scrollToSection("planner")}
+                >
+                  <ClipboardList size={16} />
+                  <span>Moving Checklist Planner</span>
+                </button>
+              </li>
+
+              <li>
+                <NavLink 
+                  to="/faq" 
+                  onClick={() => setMenuOpen(false)} 
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                >
+                  <HelpCircle size={16} />
+                  <span>Frequently Asked Questions</span>
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink 
+                  to="/about" 
+                  onClick={() => setMenuOpen(false)} 
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                >
+                  <Building2 size={16} />
+                  <span>About Us</span>
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink 
+                  to="/contact" 
+                  onClick={() => setMenuOpen(false)} 
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                >
+                  <Phone size={16} />
+                  <span>Contact Support</span>
+                </NavLink>
+              </li>
+            </ul>
+          </div>
+
+          {/* Bottom Actions */}
           <div className="mobile-actions">
-            {!user && (
+            <button className="mobile-quote-btn" onClick={handleQuoteClick}>
+              <Sparkles size={15} />
+              <span>Get Free Instant Quote</span>
+            </button>
+
+            {!user ? (
               <button className="mobile-login-btn" onClick={openLogin}>
-                <LogIn size={16} />
-                <span>Login / Signup</span>
+                <LogIn size={15} />
+                <span>Login / Register</span>
               </button>
-            )}
+            ) : null}
           </div>
         </nav>
       </div>

@@ -68,7 +68,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
 
         const dist = calculateDistance(BANGALORE_COORDS, point);
 
-        if (activeTab === "within") {
+        if (activeTab === "within" || activeTab === "same_apartment") {
           return true;
         }
 
@@ -114,6 +114,29 @@ const HomeSelection = ({ onLoginStatusChange }) => {
   const closeModal = () => setIsModalOpen(false);
 
   const handleCheckPricesAdmin = () => {
+    if (activeTab === "same_apartment") {
+      if (!fromAddress) {
+        setError("Please enter and select your Apartment / Society address from suggestions.");
+        return;
+      }
+      if (!fromCoords) {
+        setError("Please select the Apartment / Society from verified suggestions.");
+        return;
+      }
+
+      setError("");
+      const dist = "1.00";
+      setDistance(dist);
+      localStorage.setItem("fromAddress", fromAddress);
+      localStorage.setItem("toAddress", toAddress || fromAddress);
+      localStorage.setItem("shiftingDate", shiftingDate);
+      localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
+      localStorage.setItem("toCoords", JSON.stringify(toCoords || fromCoords));
+      localStorage.setItem("activeTab", "within");
+      openModal();
+      return;
+    }
+
     // Check if both addresses are filled
     if (!fromAddress || !toAddress) {
       setError("Please fill both From address and To address.");
@@ -140,6 +163,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
     localStorage.setItem("shiftingDate", shiftingDate);
     localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
     localStorage.setItem("toCoords", JSON.stringify(toCoords));
+    localStorage.setItem("activeTab", activeTab);
     openModal();
   };
 
@@ -862,7 +886,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
             isOpen={isModalOpen}
             closeModal={closeModal}
             distance={distance}
-            activeTab={activeTab}
+            activeTab={activeTab === "same_apartment" ? "within" : activeTab}
             shiftingDate={shiftingDate}
             fromAddress={fromAddress}
             toAddress={toAddress}

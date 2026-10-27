@@ -149,6 +149,12 @@ const Footer = () => {
               </a>
             </li>
             <li>
+              <a href="/faq">
+                <ArrowRight size={12} className="arrow-icon" />
+                <span>FAQs</span>
+              </a>
+            </li>
+            <li>
               <a href="/terms-and-conditions">
                 <ArrowRight size={12} className="arrow-icon" />
                 <span>Terms & Conditions</span>

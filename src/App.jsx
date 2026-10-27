@@ -17,6 +17,7 @@ import  ScrollToTop from './components/ScrollToTop.jsx'
 // Static pages
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
+import FAQ from "./pages/FAQ.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import RefundPolicy from "./pages/Refaundpolicy.jsx";
 import PravacyPolicies from "./pages/Privacypolicy.jsx";
@@ -78,6 +79,7 @@ const App = () => {
             {/* Static Pages */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/privacy-policy" element={<PravacyPolicies />} />

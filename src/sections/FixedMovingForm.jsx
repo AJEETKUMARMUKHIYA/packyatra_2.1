@@ -9,7 +9,8 @@ import {
   faCheckCircle,
   faInfoCircle,
   faBuilding,
-  faCity
+  faCity,
+  faHome
 } from "@fortawesome/free-solid-svg-icons";
 import "../styles/Cityddl.css";
 import DatePicker from "react-datepicker";
@@ -48,22 +49,62 @@ const FixedMovingForm = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [fromFocused, setFromFocused] = useState(false);
   const [toFocused, setToFocused] = useState(false);
+  const [societyFocused, setSocietyFocused] = useState(false);
+  const [pickupUnit, setPickupUnit] = useState("");
+  const [destUnit, setDestUnit] = useState("");
   
   useEffect(() => {
     setToAddress("");
     setShiftingToSuggestion([]);
     setError(""); // Clear error when tab changes
+    setPickupUnit("");
+    setDestUnit("");
   }, [activeTab]);
+
+  const onFormSubmit = () => {
+    if (activeTab === "same_apartment") {
+      if (!fromAddress) {
+        setError("Please enter and select your Apartment / Society complex address.");
+        return;
+      }
+      if (!fromCoords) {
+        setError("Please select the Apartment / Society from verified suggestions.");
+        return;
+      }
+      if (!pickupUnit.trim()) {
+        setError("Please enter your Pickup Flat / Tower / Floor (e.g. Tower B, Flat 302).");
+        return;
+      }
+      if (!destUnit.trim()) {
+        setError("Please enter your Destination Flat / Tower / Floor (e.g. Tower E, Flat 701).");
+        return;
+      }
+      if (!shiftingDate) {
+        setError("Please select your scheduled move date.");
+        return;
+      }
+
+      // Format clean full addresses with unit tags
+      const cleanBase = fromAddress.replace(/ \(Pickup: .*\)/, "").replace(/ \(Drop: .*\)/, "");
+      const fullFrom = `${cleanBase} (Pickup: ${pickupUnit.trim()})`;
+      const fullTo = `${cleanBase} (Drop: ${destUnit.trim()})`;
+      
+      setFromAddress(fullFrom);
+      setToAddress(fullTo);
+      setToCoords(fromCoords);
+    }
+    handleCheckPrices();
+  };
 
   return (
     <aside className="right-section fixed-form">
       <div className="form-container-corporate" style={{
         background: "#ffffff",
         borderRadius: "16px",
-        padding: "26px 24px",
+        padding: "24px 22px",
         boxShadow: "0 20px 40px -15px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8)",
         border: "1px solid #cbd5e1",
-        maxWidth: "380px",
+        maxWidth: "400px",
         width: "100%",
         boxSizing: "border-box",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
@@ -119,23 +160,24 @@ const FixedMovingForm = ({
         </h2>
         
         <p style={{
-          fontSize: "12.5px",
+          fontSize: "12px",
           color: "#64748b",
-          marginBottom: "18px",
+          marginBottom: "16px",
           lineHeight: "1.4"
         }}>
-          Live pricing & verified crew allocation across India.
+          Instant guaranteed pricing for intra-city, inter-city & apartment moves.
         </p>
         
-        {/* Segmented Corporate Tabs */}
+        {/* Segmented Corporate Tabs with 3 Options */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr",
           background: "#f1f5f9",
-          padding: "4px",
+          padding: "3px",
           borderRadius: "10px",
-          marginBottom: "18px",
-          border: "1px solid #e2e8f0"
+          marginBottom: "16px",
+          border: "1px solid #e2e8f0",
+          gap: "2px"
         }}>
           <button
             type="button"
@@ -151,18 +193,20 @@ const FixedMovingForm = ({
             }}
             style={{
               border: "none",
-              padding: "9px 12px",
-              borderRadius: "8px",
-              fontSize: "12.5px",
+              padding: "8px 4px",
+              borderRadius: "7px",
+              fontSize: "11.5px",
               fontWeight: "700",
               cursor: "pointer",
               transition: "all 0.2s ease",
               background: activeTab === "within" ? "#0045e6" : "transparent",
               color: activeTab === "within" ? "#ffffff" : "#475569",
-              boxShadow: activeTab === "within" ? "0 2px 8px rgba(0, 69, 230, 0.25)" : "none"
+              boxShadow: activeTab === "within" ? "0 2px 6px rgba(0, 69, 230, 0.25)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
             }}
           >
-            Intra-City Shifting
+            Intra-City
           </button>
 
           <button
@@ -179,24 +223,57 @@ const FixedMovingForm = ({
             }}
             style={{
               border: "none",
-              padding: "9px 12px",
-              borderRadius: "8px",
-              fontSize: "12.5px",
+              padding: "8px 4px",
+              borderRadius: "7px",
+              fontSize: "11.5px",
               fontWeight: "700",
               cursor: "pointer",
               transition: "all 0.2s ease",
               background: activeTab === "between" ? "#0045e6" : "transparent",
               color: activeTab === "between" ? "#ffffff" : "#475569",
-              boxShadow: activeTab === "between" ? "0 2px 8px rgba(0, 69, 230, 0.25)" : "none"
+              boxShadow: activeTab === "between" ? "0 2px 6px rgba(0, 69, 230, 0.25)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
             }}
           >
-            Inter-City Transit
+            Inter-City
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("same_apartment");
+              setFromAddress("");
+              setToAddress("");
+              setFromCoords(null);
+              setToCoords(null);
+              setShiftFromSuggestion([]);
+              setShiftingToSuggestion([]);
+              setError("");
+            }}
+            style={{
+              border: "none",
+              padding: "8px 4px",
+              borderRadius: "7px",
+              fontSize: "11.5px",
+              fontWeight: "700",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              background: activeTab === "same_apartment" ? "#0045e6" : "transparent",
+              color: activeTab === "same_apartment" ? "#ffffff" : "#475569",
+              boxShadow: activeTab === "same_apartment" ? "0 2px 6px rgba(0, 69, 230, 0.25)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
+            }}
+            title="Shifting within the same apartment complex or society"
+          >
+            Same Apartment
           </button>
         </div>
 
-        {/* City Selector (Intra-city) */}
-        {activeTab === "within" && (
-          <div style={{ marginBottom: "16px" }}>
+        {/* City Selector (Intra-city & Same Apartment) */}
+        {(activeTab === "within" || activeTab === "same_apartment") && (
+          <div style={{ marginBottom: "14px" }}>
             <label style={{
               display: "block",
               fontSize: "11px",
@@ -214,7 +291,7 @@ const FixedMovingForm = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "10px 14px",
+                padding: "9px 12px",
                 borderRadius: "10px",
                 border: dropdownOpen ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
                 background: "#f8fafc",
@@ -225,11 +302,11 @@ const FixedMovingForm = ({
             >
               {selectedCity ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <img src={cities.find(c => c.name === selectedCity)?.img} alt={selectedCity} style={{ width: "22px", height: "22px" }} />
-                  <span style={{ fontSize: "13.5px", fontWeight: "600", color: "#0f172a" }}>{selectedCity}</span>
+                  <img src={cities.find(c => c.name === selectedCity)?.img} alt={selectedCity} style={{ width: "20px", height: "20px" }} />
+                  <span style={{ fontSize: "13px", fontWeight: "600", color: "#0f172a" }}>{selectedCity}</span>
                 </div>
               ) : (
-                <span style={{ fontSize: "13px", color: "#64748b", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "12.5px", color: "#64748b", display: "flex", alignItems: "center", gap: "8px" }}>
                   <FontAwesomeIcon icon={faCity} style={{ color: "#94a3b8" }} /> Select primary city hub
                 </span>
               )}
@@ -268,7 +345,7 @@ const FixedMovingForm = ({
                       transition: "all 0.15s ease"
                     }}
                   >
-                    <img src={city.img} alt={city.name} style={{ width: "24px", height: "24px" }} />
+                    <img src={city.img} alt={city.name} style={{ width: "22px", height: "22px" }} />
                     <span style={{ fontSize: "13px", fontWeight: "600", color: "#0f172a" }}>{city.name}</span>
                   </div>
                 ))}
@@ -293,202 +370,407 @@ const FixedMovingForm = ({
           </div>
         )}
 
-        {/* Shifting From Input */}
-        <div style={{ marginBottom: "14px", position: "relative" }}>
-          <label style={{
-            display: "block",
-            fontSize: "11px",
-            fontWeight: "700",
-            color: "#475569",
-            textTransform: "uppercase",
-            letterSpacing: "0.6px",
-            marginBottom: "5px"
-          }}>
-            Origin Location (Pickup)
-          </label>
-          <div style={{ position: "relative" }}>
-            <span style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#0045e6",
-              fontSize: "13px",
-              zIndex: 1
-            }}>
-              <FontAwesomeIcon icon={faMapMarkerAlt} />
-            </span>
-            <input
-              type="text"
-              placeholder="e.g. Indiranagar, Bengaluru or Street Name"
-              value={fromAddress}
-              onFocus={() => setFromFocused(true)}
-              onBlur={() => setTimeout(() => setFromFocused(false), 200)}
-              onChange={(e) => {
-                const val = e.target.value;
-                setFromAddress(val);
-                setFromCoords(null);
-                setError("");
-                fetchAddressSuggestions(val, setShiftFromSuggestion, selectedCity);
-              }}
-              style={{
-                width: "100%",
-                padding: "10px 12px 10px 34px",
-                borderRadius: "10px",
-                border: fromFocused ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
-                fontSize: "13px",
-                fontWeight: "500",
-                color: "#0f172a",
-                outline: "none",
-                boxSizing: "border-box",
-                transition: "all 0.15s ease",
-                background: "#ffffff",
-                boxShadow: fromFocused ? "0 0 0 3px rgba(0, 69, 230, 0.12)" : "none"
-              }}
-            />
-          </div>
-          {shiftFromSuggestion.length > 0 && (
-            <div className="suggestions" style={{
-              position: "absolute",
-              width: "100%",
-              background: "#ffffff",
-              borderRadius: "10px",
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)",
-              border: "1px solid #cbd5e1",
-              marginTop: "4px",
-              zIndex: 9999,
-              maxHeight: "190px",
-              overflowY: "auto"
-            }}>
-              {shiftFromSuggestion.map((p, i) => (
-                <div
-                  key={i}
-                  className="suggestion-item"
-                  onClick={() => {
-                    setFromAddress(p.properties?.formatted || "");
-                    setFromCoords({ lat: p.properties?.lat, lon: p.properties?.lon });
-                    setShiftFromSuggestion([]);
+        {/* ========================================================
+            TAB 1 & 2: STANDARD INTRA-CITY & INTER-CITY FIELDS
+           ======================================================== */}
+        {activeTab !== "same_apartment" && (
+          <>
+            {/* Shifting From Input */}
+            <div style={{ marginBottom: "14px", position: "relative" }}>
+              <label style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: "700",
+                color: "#475569",
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                marginBottom: "5px"
+              }}>
+                Origin Location (Pickup)
+              </label>
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#0045e6",
+                  fontSize: "13px",
+                  zIndex: 1
+                }}>
+                  <FontAwesomeIcon icon={faMapMarkerAlt} />
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Indiranagar, Bengaluru or Street Name"
+                  value={fromAddress}
+                  onFocus={() => setFromFocused(true)}
+                  onBlur={() => setTimeout(() => setFromFocused(false), 200)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFromAddress(val);
+                    setFromCoords(null);
                     setError("");
+                    fetchAddressSuggestions(val, setShiftFromSuggestion, selectedCity);
                   }}
                   style={{
-                    padding: "9px 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "12.5px",
-                    color: "#334155",
-                    cursor: "pointer",
-                    borderBottom: i < shiftFromSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
-                    transition: "background 0.15s ease"
+                    width: "100%",
+                    padding: "10px 12px 10px 34px",
+                    borderRadius: "10px",
+                    border: fromFocused ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#0f172a",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "all 0.15s ease",
+                    background: "#ffffff",
+                    boxShadow: fromFocused ? "0 0 0 3px rgba(0, 69, 230, 0.12)" : "none"
                   }}
-                >
-                  <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#0045e6", fontSize: "11px" }} />
-                  <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
+                />
+              </div>
+              {shiftFromSuggestion.length > 0 && (
+                <div className="suggestions" style={{
+                  position: "absolute",
+                  width: "100%",
+                  background: "#ffffff",
+                  borderRadius: "10px",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #cbd5e1",
+                  marginTop: "4px",
+                  zIndex: 9999,
+                  maxHeight: "190px",
+                  overflowY: "auto"
+                }}>
+                  {shiftFromSuggestion.map((p, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        setFromAddress(p.properties?.formatted || "");
+                        setFromCoords({ lat: p.properties?.lat, lon: p.properties?.lon });
+                        setShiftFromSuggestion([]);
+                        setError("");
+                      }}
+                      style={{
+                        padding: "9px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontSize: "12.5px",
+                        color: "#334155",
+                        cursor: "pointer",
+                        borderBottom: i < shiftFromSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
+                        transition: "background 0.15s ease"
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#0045e6", fontSize: "11px" }} />
+                      <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Shifting To Input */}
-        <div style={{ marginBottom: "14px", position: "relative" }}>
-          <label style={{
-            display: "block",
-            fontSize: "11px",
-            fontWeight: "700",
-            color: "#475569",
-            textTransform: "uppercase",
-            letterSpacing: "0.6px",
-            marginBottom: "5px"
-          }}>
-            Destination Location (Delivery)
-          </label>
-          <div style={{ position: "relative" }}>
-            <span style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#059669",
-              fontSize: "13px",
-              zIndex: 1
-            }}>
-              <FontAwesomeIcon icon={faMapMarkerAlt} />
-            </span>
-            <input
-              type="text"
-              placeholder="e.g. Whitefield, Bengaluru or Destination City"
-              value={toAddress}
-              onFocus={() => setToFocused(true)}
-              onBlur={() => setTimeout(() => setToFocused(false), 200)}
-              onChange={(e) => {
-                const val = e.target.value;
-                setToAddress(val);
-                setToCoords(null);
-                setError("");
-                fetchAddressSuggestions(val, setShiftingToSuggestion, selectedCity);
-              }}
-              style={{
-                width: "100%",
-                padding: "10px 12px 10px 34px",
-                borderRadius: "10px",
-                border: toFocused ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
-                fontSize: "13px",
-                fontWeight: "500",
-                color: "#0f172a",
-                outline: "none",
-                boxSizing: "border-box",
-                transition: "all 0.15s ease",
-                background: "#ffffff",
-                boxShadow: toFocused ? "0 0 0 3px rgba(0, 69, 230, 0.12)" : "none"
-              }}
-            />
-          </div>
-          {shiftingToSuggestion.length > 0 && (
-            <div className="suggestions" style={{
-              position: "absolute",
-              width: "100%",
-              background: "#ffffff",
-              borderRadius: "10px",
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)",
-              border: "1px solid #cbd5e1",
-              marginTop: "4px",
-              zIndex: 9999,
-              maxHeight: "190px",
-              overflowY: "auto"
-            }}>
-              {shiftingToSuggestion.map((p, i) => (
-                <div
-                  key={i}
-                  className="suggestion-item"
-                  onClick={() => {
-                    setToAddress(p.properties?.formatted || "");
-                    setToCoords({ lat: p.properties?.lat, lon: p.properties?.lon });
-                    setShiftingToSuggestion([]);
+            {/* Shifting To Input */}
+            <div style={{ marginBottom: "14px", position: "relative" }}>
+              <label style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: "700",
+                color: "#475569",
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                marginBottom: "5px"
+              }}>
+                Destination Location (Delivery)
+              </label>
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#059669",
+                  fontSize: "13px",
+                  zIndex: 1
+                }}>
+                  <FontAwesomeIcon icon={faMapMarkerAlt} />
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Whitefield, Bengaluru or Destination City"
+                  value={toAddress}
+                  onFocus={() => setToFocused(true)}
+                  onBlur={() => setTimeout(() => setToFocused(false), 200)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setToAddress(val);
+                    setToCoords(null);
+                    setError("");
+                    fetchAddressSuggestions(val, setShiftingToSuggestion, selectedCity);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px 10px 34px",
+                    borderRadius: "10px",
+                    border: toFocused ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#0f172a",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "all 0.15s ease",
+                    background: "#ffffff",
+                    boxShadow: toFocused ? "0 0 0 3px rgba(0, 69, 230, 0.12)" : "none"
+                  }}
+                />
+              </div>
+              {shiftingToSuggestion.length > 0 && (
+                <div className="suggestions" style={{
+                  position: "absolute",
+                  width: "100%",
+                  background: "#ffffff",
+                  borderRadius: "10px",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #cbd5e1",
+                  marginTop: "4px",
+                  zIndex: 9999,
+                  maxHeight: "190px",
+                  overflowY: "auto"
+                }}>
+                  {shiftingToSuggestion.map((p, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        setToAddress(p.properties?.formatted || "");
+                        setToCoords({ lat: p.properties?.lat, lon: p.properties?.lon });
+                        setShiftingToSuggestion([]);
+                        setError("");
+                      }}
+                      style={{
+                        padding: "9px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontSize: "12.5px",
+                        color: "#334155",
+                        cursor: "pointer",
+                        borderBottom: i < shiftingToSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
+                        transition: "background 0.15s ease"
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#0045e6", fontSize: "11px" }} />
+                      <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ========================================================
+            TAB 3: SAME APARTMENT SHIFTING MODE
+           ======================================================== */}
+        {activeTab === "same_apartment" && (
+          <div style={{ marginBottom: "14px" }}>
+            {/* Apartment / Society Complex Address with Suggestions */}
+            <div style={{ marginBottom: "12px", position: "relative" }}>
+              <label style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: "700",
+                color: "#475569",
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                marginBottom: "5px"
+              }}>
+                Apartment / Society Name & Address
+              </label>
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#0045e6",
+                  fontSize: "13px",
+                  zIndex: 1
+                }}>
+                  <FontAwesomeIcon icon={faBuilding} />
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Prestige Lakeside Habitat, Varthur"
+                  value={fromAddress}
+                  onFocus={() => setSocietyFocused(true)}
+                  onBlur={() => setTimeout(() => setSocietyFocused(false), 200)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFromAddress(val);
+                    setFromCoords(null);
+                    setError("");
+                    fetchAddressSuggestions(val, setShiftFromSuggestion, selectedCity);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px 10px 34px",
+                    borderRadius: "10px",
+                    border: societyFocused ? "1.5px solid #0045e6" : "1.5px solid #cbd5e1",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#0f172a",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "all 0.15s ease",
+                    background: "#ffffff",
+                    boxShadow: societyFocused ? "0 0 0 3px rgba(0, 69, 230, 0.12)" : "none"
+                  }}
+                />
+              </div>
+              {shiftFromSuggestion.length > 0 && (
+                <div className="suggestions" style={{
+                  position: "absolute",
+                  width: "100%",
+                  background: "#ffffff",
+                  borderRadius: "10px",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #cbd5e1",
+                  marginTop: "4px",
+                  zIndex: 9999,
+                  maxHeight: "190px",
+                  overflowY: "auto"
+                }}>
+                  {shiftFromSuggestion.map((p, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        const formatted = p.properties?.formatted || "";
+                        setFromAddress(formatted);
+                        setToAddress(formatted);
+                        const coords = { lat: p.properties?.lat, lon: p.properties?.lon };
+                        setFromCoords(coords);
+                        setToCoords(coords);
+                        setShiftFromSuggestion([]);
+                        setError("");
+                      }}
+                      style={{
+                        padding: "9px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontSize: "12.5px",
+                        color: "#334155",
+                        cursor: "pointer",
+                        borderBottom: i < shiftFromSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
+                        transition: "background 0.15s ease"
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#0045e6", fontSize: "11px" }} />
+                      <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Side-by-Side: Pickup Flat/Tower and Drop Flat/Tower */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+              <div>
+                <label style={{
+                  display: "block",
+                  fontSize: "10.5px",
+                  fontWeight: "700",
+                  color: "#475569",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: "4px"
+                }}>
+                  Pickup Flat / Tower
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tower B, Flat 302"
+                  value={pickupUnit}
+                  onChange={(e) => {
+                    setPickupUnit(e.target.value);
                     setError("");
                   }}
                   style={{
-                    padding: "9px 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "12.5px",
-                    color: "#334155",
-                    cursor: "pointer",
-                    borderBottom: i < shiftingToSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
-                    transition: "background 0.15s ease"
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color: "#0f172a",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    background: "#ffffff"
                   }}
-                >
-                  <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#0045e6", fontSize: "11px" }} />
-                  <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
-                </div>
-              ))}
+                />
+              </div>
+
+              <div>
+                <label style={{
+                  display: "block",
+                  fontSize: "10.5px",
+                  fontWeight: "700",
+                  color: "#475569",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: "4px"
+                }}>
+                  Drop Flat / Tower
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tower E, Flat 701"
+                  value={destUnit}
+                  onChange={(e) => {
+                    setDestUnit(e.target.value);
+                    setError("");
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color: "#0f172a",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    background: "#ffffff"
+                  }}
+                />
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Same Society Pricing Logic Tag */}
+            <div style={{
+              background: "rgba(0, 69, 230, 0.06)",
+              border: "1px solid rgba(0, 69, 230, 0.16)",
+              borderRadius: "8px",
+              padding: "7px 10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontSize: "11px",
+              color: "#0045e6",
+              fontWeight: "600"
+            }}>
+              <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: "11px", color: "#0045e6" }} />
+              <span>Intra-City shifting pricing applied (full labor, packing & moving)</span>
+            </div>
+          </div>
+        )}
 
         {/* Shifting Date Input */}
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "18px" }}>
           <label style={{
             display: "block",
             fontSize: "11px",
@@ -529,7 +811,7 @@ const FixedMovingForm = ({
         <button 
           type="button"
           className="submit-btn" 
-          onClick={handleCheckPrices}
+          onClick={onFormSubmit}
           style={{
             width: "100%",
             background: "#0045e6",

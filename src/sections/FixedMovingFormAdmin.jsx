@@ -9,7 +9,8 @@ import {
   faShieldAlt, 
   faCheckCircle,
   faInfoCircle,
-  faUserShield
+  faUserShield,
+  faBuilding
 } from "@fortawesome/free-solid-svg-icons";
 import "../styles/Cityddl.css";
 import DatePicker from "react-datepicker";
@@ -46,12 +47,45 @@ const FixedMovingFormAdmin = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [fromFocused, setFromFocused] = useState(false);
   const [toFocused, setToFocused] = useState(false);
+  const [societyFocused, setSocietyFocused] = useState(false);
+  const [pickupUnit, setPickupUnit] = useState("");
+  const [destUnit, setDestUnit] = useState("");
   
   useEffect(() => {
     setToAddress("");
     setShiftingToSuggestion([]);
     setError("");
+    setPickupUnit("");
+    setDestUnit("");
   }, [activeTab]);
+
+  const onFormSubmit = () => {
+    if (activeTab === "same_apartment") {
+      if (!fromAddress) {
+        setError("Please enter and select your Apartment / Society address from suggestions.");
+        return;
+      }
+      if (!pickupUnit.trim()) {
+        setError("Please enter your Pickup Flat / Tower / Floor (e.g. Tower B, Flat 302).");
+        return;
+      }
+      if (!destUnit.trim()) {
+        setError("Please enter your Destination Flat / Tower / Floor (e.g. Tower E, Flat 701).");
+        return;
+      }
+      if (!shiftingDate) {
+        setError("Please select your scheduled move date.");
+        return;
+      }
+
+      const cleanBase = fromAddress.replace(/ \(Pickup: .*\)/, "").replace(/ \(Drop: .*\)/, "");
+      const fullFrom = `${cleanBase} (Pickup: ${pickupUnit.trim()})`;
+      const fullTo = `${cleanBase} (Drop: ${destUnit.trim()})`;
+      setFromAddress(fullFrom);
+      setToAddress(fullTo);
+    }
+    handleCheckPricesAdmin();
+  };
 
   return (
     <aside className="right-section fixed-form">
@@ -126,12 +160,14 @@ const FixedMovingFormAdmin = ({
         
         {/* Tabs */}
         <div style={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
           background: "#f1f5f9",
-          padding: "5px",
+          padding: "4px",
           borderRadius: "14px",
-          marginBottom: "22px",
-          border: "1px solid #e2e8f0"
+          marginBottom: "20px",
+          border: "1px solid #e2e8f0",
+          gap: "3px"
         }}>
           <button
             onClick={() => {
@@ -145,17 +181,18 @@ const FixedMovingFormAdmin = ({
               setError("");
             }}
             style={{
-              flex: 1,
               border: "none",
-              padding: "10px 12px",
+              padding: "9px 6px",
               borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "600",
+              fontSize: "12px",
+              fontWeight: "700",
               cursor: "pointer",
               transition: "all 0.2s ease",
               background: activeTab === "within" ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "transparent",
               color: activeTab === "within" ? "#ffffff" : "#64748b",
-              boxShadow: activeTab === "within" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none"
+              boxShadow: activeTab === "within" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
             }}
           >
             Within city
@@ -173,25 +210,55 @@ const FixedMovingFormAdmin = ({
               setError("");
             }}
             style={{
-              flex: 1,
               border: "none",
-              padding: "10px 12px",
+              padding: "9px 6px",
               borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "600",
+              fontSize: "12px",
+              fontWeight: "700",
               cursor: "pointer",
               transition: "all 0.2s ease",
               background: activeTab === "between" ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "transparent",
               color: activeTab === "between" ? "#ffffff" : "#64748b",
-              boxShadow: activeTab === "between" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none"
+              boxShadow: activeTab === "between" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
             }}
           >
             Between cities
           </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("same_apartment");
+              setFromAddress("");
+              setToAddress("");
+              setFromCoords(null);
+              setToCoords(null);
+              setShiftFromSuggestion([]);
+              setShiftingToSuggestion([]);
+              setError("");
+            }}
+            style={{
+              border: "none",
+              padding: "9px 6px",
+              borderRadius: "10px",
+              fontSize: "12px",
+              fontWeight: "700",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              background: activeTab === "same_apartment" ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "transparent",
+              color: activeTab === "same_apartment" ? "#ffffff" : "#64748b",
+              boxShadow: activeTab === "same_apartment" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none",
+              whiteSpace: "nowrap",
+              textAlign: "center"
+            }}
+          >
+            Same Apartment
+          </button>
         </div>
 
         {/* City Selector */}
-        {activeTab === "within" && (
+        {(activeTab === "within" || activeTab === "same_apartment") && (
           <div style={{ marginBottom: "18px" }}>
             <label style={{
               display: "block",
@@ -288,20 +355,185 @@ const FixedMovingFormAdmin = ({
           </div>
         )}
 
-        {/* Shifting From */}
-        <div style={{ marginBottom: "18px", position: "relative" }}>
-          <label style={{
-            display: "block",
-            fontSize: "12px",
-            fontWeight: "700",
-            color: "#334155",
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            marginBottom: "6px"
-          }}>
-            Shifting from
-          </label>
-          <div style={{ position: "relative" }}>
+        {/* Same Apartment Mode */}
+        {activeTab === "same_apartment" && (
+          <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "14px", position: "relative" }}>
+              <label style={{
+                display: "block",
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#334155",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: "6px"
+              }}>
+                Apartment / Society Name & Address
+              </label>
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  position: "absolute",
+                  left: "14px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#2563eb",
+                  fontSize: "14px",
+                  zIndex: 1
+                }}>
+                  <FontAwesomeIcon icon={faBuilding} />
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Prestige Lakeside Habitat, Varthur"
+                  value={fromAddress}
+                  onFocus={() => setSocietyFocused(true)}
+                  onBlur={() => setTimeout(() => setSocietyFocused(false), 200)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFromAddress(val);
+                    setFromCoords(null);
+                    setError("");
+                    fetchAddressSuggestions(val, setShiftFromSuggestion, selectedCity);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px 12px 42px",
+                    borderRadius: "12px",
+                    border: societyFocused ? "1.5px solid #2563eb" : "1.5px solid #cbd5e1",
+                    fontSize: "13.5px",
+                    fontWeight: "500",
+                    color: "#1e293b",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "all 0.2s ease",
+                    background: "#ffffff",
+                    boxShadow: societyFocused ? "0 0 0 3px rgba(37, 99, 235, 0.12)" : "none"
+                  }}
+                />
+              </div>
+              {shiftFromSuggestion.length > 0 && (
+                <div className="suggestions" style={{
+                  position: "absolute",
+                  width: "100%",
+                  background: "#ffffff",
+                  borderRadius: "12px",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e2e8f0",
+                  marginTop: "6px",
+                  zIndex: 9999,
+                  maxHeight: "220px",
+                  overflowY: "auto"
+                }}>
+                  {shiftFromSuggestion.map((p, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        const formatted = p.properties?.formatted || "";
+                        setFromAddress(formatted);
+                        setToAddress(formatted);
+                        const coords = { lat: p.properties?.lat, lon: p.properties?.lon };
+                        setFromCoords(coords);
+                        setToCoords(coords);
+                        setShiftFromSuggestion([]);
+                        setError("");
+                      }}
+                      style={{
+                        padding: "11px 14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        fontSize: "13px",
+                        color: "#334155",
+                        cursor: "pointer",
+                        borderBottom: i < shiftFromSuggestion.length - 1 ? "1px solid #f1f5f9" : "none",
+                        transition: "background 0.15s ease"
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faLocationArrow} style={{ color: "#2563eb", fontSize: "12px" }} />
+                      <span style={{ fontWeight: "500" }}>{p.properties?.formatted}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "12px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                  Pickup Unit / Tower
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tower B, Flat 302"
+                  value={pickupUnit}
+                  onChange={(e) => { setPickupUnit(e.target.value); setError(""); }}
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "12.5px",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                  Drop Unit / Tower
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tower E, Flat 701"
+                  value={destUnit}
+                  onChange={(e) => { setDestUnit(e.target.value); setError(""); }}
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "12.5px",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{
+              background: "rgba(37, 99, 235, 0.08)",
+              border: "1px solid rgba(37, 99, 235, 0.2)",
+              borderRadius: "10px",
+              padding: "8px 12px",
+              fontSize: "11.5px",
+              color: "#1d4ed8",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px"
+            }}>
+              <FontAwesomeIcon icon={faCheckCircle} />
+              <span>Intra-City shifting pricing applied</span>
+            </div>
+          </div>
+        )}
+
+        {/* Standard Origin & Destination for Intra/Inter City */}
+        {activeTab !== "same_apartment" && (
+          <>
+            {/* Shifting From */}
+            <div style={{ marginBottom: "18px", position: "relative" }}>
+              <label style={{
+                display: "block",
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#334155",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: "6px"
+              }}>
+                Shifting from
+              </label>
+              <div style={{ position: "relative" }}>
             <span style={{
               position: "absolute",
               left: "14px",
@@ -481,49 +713,51 @@ const FixedMovingFormAdmin = ({
             </div>
           )}
         </div>
+      </>
+    )}
 
-        {/* Date */}
-        <div style={{ marginBottom: "26px" }}>
-          <label style={{
-            display: "block",
-            fontSize: "12px",
-            fontWeight: "700",
-            color: "#334155",
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            marginBottom: "6px"
-          }}>
-            Select shifting date
-          </label>
-          <div style={{ position: "relative" }} className="date-input-wrapper-premium">
-            <span style={{
-              position: "absolute",
-              left: "14px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#64748b",
-              fontSize: "14px",
-              zIndex: 2,
-              pointerEvents: "none"
-            }}>
-              <FontAwesomeIcon icon={faCalendarAlt} />
-            </span>
-            <DatePicker
-              selected={shiftingDate}
-              onChange={(date) => setShiftingDate(date)}
-              dateFormat="dd-MM-yyyy"
-              placeholderText="dd-mm-yyyy"
-              className="date-input"
-              showIcon={false}
-              minDate={new Date()}
-            />
-          </div>
-        </div>
+    {/* Date */}
+    <div style={{ marginBottom: "26px" }}>
+      <label style={{
+        display: "block",
+        fontSize: "12px",
+        fontWeight: "700",
+        color: "#334155",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        marginBottom: "6px"
+      }}>
+        Select shifting date
+      </label>
+      <div style={{ position: "relative" }} className="date-input-wrapper-premium">
+        <span style={{
+          position: "absolute",
+          left: "14px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: "#64748b",
+          fontSize: "14px",
+          zIndex: 2,
+          pointerEvents: "none"
+        }}>
+          <FontAwesomeIcon icon={faCalendarAlt} />
+        </span>
+        <DatePicker
+          selected={shiftingDate}
+          onChange={(date) => setShiftingDate(date)}
+          dateFormat="dd-MM-yyyy"
+          placeholderText="dd-mm-yyyy"
+          className="date-input"
+          showIcon={false}
+          minDate={new Date()}
+        />
+      </div>
+    </div>
 
-        {/* Submit */}
-        <button 
-          className="submit-btn" 
-          onClick={handleCheckPricesAdmin}
+    {/* Submit */}
+    <button 
+      className="submit-btn" 
+      onClick={onFormSubmit}
           style={{
             width: "100%",
             background: "linear-gradient(135deg, #7e22ce, #6b21a8)",

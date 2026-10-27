@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import FixedMovingForm from "../sections/FixedMovingForm";
 import Modal from "../pages/Model";
@@ -30,7 +31,8 @@ import {
   faClock,
   faFileContract,
   faAward,
-  faArrowRight
+  faArrowRight,
+  faPaw
 } from "@fortawesome/free-solid-svg-icons";
 import PackYatraLogo from "../components/PackYatraLogo.jsx";
 import packyatraLuxuryRelocationImg from "../assets/images/packyatra_luxury_relocation_1791910596759.jpg";
@@ -40,6 +42,7 @@ import packyatraCrewImg from "../assets/images/packyatra_crew_packing_1790740227
 import "../styles/app-styles.css";
 
 const HomeSelection = ({ onLoginStatusChange }) => {
+  const navigate = useNavigate();
   const [fromAddress, setFromAddress] = useState("");
   const [toAddress, setToAddress] = useState("");
   const [shiftingDate, setShiftingDate] = useState("");
@@ -52,8 +55,6 @@ const HomeSelection = ({ onLoginStatusChange }) => {
   const [fromCoords, setFromCoords] = useState(null);
   const [toCoords, setToCoords] = useState(null);
   const [distance, setDistance] = useState(0);
-  const [faqSearch, setFaqSearch] = useState("");
-  const [selectedFaqCategory, setSelectedFaqCategory] = useState("All");
 
   // --- INTERACTIVE MOVING CHECKLIST PLANNERS STATES ---
   const defaultChecklist = [
@@ -221,7 +222,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
 
         const dist = calculateDistance(BANGALORE_COORDS, point);
 
-        if (activeTab === "within") {
+        if (activeTab === "within" || activeTab === "same_apartment") {
           return true;
         }
 
@@ -267,6 +268,32 @@ const HomeSelection = ({ onLoginStatusChange }) => {
   const closeModal = () => setIsModalOpen(false);
 
   const handleCheckPrices = () => {
+    // Same Apartment Shifting Price Logic (uses Intra-City base pricing)
+    if (activeTab === "same_apartment") {
+      if (!fromAddress) {
+        setError("Please enter and select your Apartment / Society complex address.");
+        return;
+      }
+      if (!fromCoords) {
+        setError("Please select the Apartment / Society from verified suggestions.");
+        return;
+      }
+
+      setError("");
+      // Intra-City shifting base pricing with minimum distance for same apartment move
+      const dist = "1.00";
+      setDistance(dist);
+      localStorage.setItem("fromAddress", fromAddress);
+      localStorage.setItem("toAddress", toAddress || fromAddress);
+      localStorage.setItem("shiftingDate", shiftingDate);
+      localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
+      localStorage.setItem("toCoords", JSON.stringify(toCoords || fromCoords));
+      localStorage.setItem("activeTab", "within"); // Use Intra-City shifting logic
+      localStorage.setItem("shiftingType", "same_apartment");
+      openModal();
+      return;
+    }
+
     if (!fromAddress || !toAddress) {
       setError("Please fill both Origin and Destination addresses.");
       return;
@@ -291,15 +318,11 @@ const HomeSelection = ({ onLoginStatusChange }) => {
     localStorage.setItem("shiftingDate", shiftingDate);
     localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
     localStorage.setItem("toCoords", JSON.stringify(toCoords));
+    localStorage.setItem("activeTab", activeTab);
     openModal();
   };
 
-  const [activeFaq, setActiveFaq] = useState(null);
   const [activeServiceTab, setActiveServiceTab] = useState("all");
-
-  const toggleFaq = (questionText) => {
-    setActiveFaq(activeFaq === questionText ? null : questionText);
-  };
 
   const handleServiceSelect = (serviceTitle) => {
     const element = document.querySelector(".fixed-form") || document.getElementById("home");
@@ -343,6 +366,20 @@ const HomeSelection = ({ onLoginStatusChange }) => {
         "Modular furniture dismantling & certified re-assembly",
         "High-value fragile & art handling protocols",
         "Complete door-to-door transit insurance"
+      ]
+    },
+    {
+      icon: faPaw,
+      title: "Compassionate Pet Relocation",
+      desc: "Stress-free, climate-controlled, veterinary-assisted pet moving solutions designed for dogs, cats, and companion animals.",
+      category: "shifting",
+      badge: "Vet-Certified Transit",
+      accentColor: "blue",
+      features: [
+        "IATA-compliant, well-ventilated travel crates & sanitized bedding",
+        "Veterinary health check & vaccination compliance assistance",
+        "Dedicated pet handler with scheduled hydration, food & walks",
+        "Real-time GPS transit monitoring with live photo check-ins"
       ]
     },
     {
@@ -408,14 +445,6 @@ const HomeSelection = ({ onLoginStatusChange }) => {
     return service.category === activeServiceTab;
   });
 
-  const faqCategories = ["All", "Pricing & Booking", "Safety & Insurance", "Our Process", "General"];
-
-  const filteredFaqs = faqData.filter((faq) => {
-    const matchesCategory = selectedFaqCategory === "All" || faq.category === selectedFaqCategory;
-    const matchesSearch = faq.q.toLowerCase().includes(faqSearch.toLowerCase()) || 
-                          faq.a.toLowerCase().includes(faqSearch.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
 
   return (
     <div className="content-wrapper" style={{ background: "#f8fafc", color: "#0f172a" }}>
@@ -839,7 +868,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
             isOpen={isModalOpen}
             closeModal={closeModal}
             distance={distance}
-            activeTab={activeTab}
+            activeTab={activeTab === "same_apartment" ? "within" : activeTab}
             shiftingDate={shiftingDate}
             fromAddress={fromAddress}
             toAddress={toAddress}
@@ -847,9 +876,200 @@ const HomeSelection = ({ onLoginStatusChange }) => {
           />
 
           {/* =========================================================
+              ATTRACTIVE IN-PAGE HOME QUICK MENU / NAVIGATION STRIP
+             ========================================================= */}
+          <nav 
+            className="home-quick-nav-strip"
+            style={{
+              position: "sticky",
+              top: "110px",
+              zIndex: 990,
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderBottom: "1.5px solid #e2e8f0",
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.05)",
+              padding: "8px 24px"
+            }}
+            aria-label="Home page quick navigation"
+          >
+            <div className="container" style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+              {/* Quick links scrollable container */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                overflowX: "auto",
+                padding: "2px 0",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+              }} className="hide-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.querySelector(".fixed-form") || document.getElementById("home");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "700",
+                    background: "rgba(0, 69, 230, 0.08)",
+                    color: "#0045e6",
+                    border: "1px solid rgba(0, 69, 230, 0.2)",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTruck} style={{ fontSize: "11px" }} />
+                  <span>Instant Quote</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("services");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    background: "#f8fafc",
+                    color: "#334155",
+                    border: "1px solid #cbd5e1",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0045e6"; e.currentTarget.style.color = "#0045e6"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#334155"; }}
+                >
+                  <FontAwesomeIcon icon={faBuilding} style={{ fontSize: "11px", color: "#64748b" }} />
+                  <span>Our Services</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("estimator");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    background: "#f8fafc",
+                    color: "#334155",
+                    border: "1px solid #cbd5e1",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0045e6"; e.currentTarget.style.color = "#0045e6"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#334155"; }}
+                >
+                  <FontAwesomeIcon icon={faCalculator} style={{ fontSize: "11px", color: "#64748b" }} />
+                  <span>Cost Calculator</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("planner");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    background: "#f8fafc",
+                    color: "#334155",
+                    border: "1px solid #cbd5e1",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0045e6"; e.currentTarget.style.color = "#0045e6"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#334155"; }}
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: "11px", color: "#64748b" }} />
+                  <span>Moving Checklist</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/faq")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    background: "#f8fafc",
+                    color: "#334155",
+                    border: "1px solid #cbd5e1",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0045e6"; e.currentTarget.style.color = "#0045e6"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#334155"; }}
+                  title="View Dedicated FAQ Page"
+                >
+                  <FontAwesomeIcon icon={faQuestionCircle} style={{ fontSize: "11px", color: "#64748b" }} />
+                  <span>FAQ Page</span>
+                </button>
+              </div>
+
+              {/* Right: Quick Call CTA */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+                <a 
+                  href="tel:+919071535535"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    textDecoration: "none",
+                    padding: "5px 12px",
+                    borderRadius: "6px",
+                    background: "#f1f5f9",
+                    border: "1px solid #cbd5e1"
+                  }}
+                >
+                  <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e" }} />
+                  <span>Direct Move Line: <strong>+91 90715 35535</strong></span>
+                </a>
+              </div>
+            </div>
+          </nav>
+
+          {/* =========================================================
               EXECUTIVE SERVICES SECTION
              ========================================================= */}
-          <section style={{ padding: "5rem 24px", background: "#f8fafc" }}>
+          <section id="services" style={{ padding: "5rem 24px", background: "#f8fafc" }}>
             <div className="container" style={{ maxWidth: "1280px", margin: "0 auto" }}>
               
               <div style={{ textAlign: "center", marginBottom: "3rem" }}>
@@ -2177,248 +2397,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
             </div>
           </section>
 
-          {/* =========================================================
-              FREQUENTLY ASKED QUESTIONS SECTION
-             ========================================================= */}
-          <section style={{ padding: "80px 24px 100px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
-            <div className="container" style={{ maxWidth: "960px", margin: "0 auto" }}>
-              <div style={{ textAlign: "center", marginBottom: "40px" }}>
-                <div style={{
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  color: "#0045e6",
-                  marginBottom: "8px"
-                }}>
-                  Knowledge Base & Regulatory FAQ
-                </div>
-                <h2 style={{
-                  fontSize: "32px",
-                  fontWeight: "800",
-                  color: "#0f172a",
-                  marginBottom: "10px",
-                  letterSpacing: "-0.025em"
-                }}>
-                  Frequently Asked Questions
-                </h2>
-                <p style={{
-                  fontSize: "15px",
-                  color: "#64748b",
-                  maxWidth: "540px",
-                  margin: "0 auto",
-                  lineHeight: "1.6"
-                }}>
-                  Clear guidelines on corporate contracts, insurance policies, transit tracking, and operational standards.
-                </p>
-              </div>
 
-              {/* Search & Categories */}
-              <div style={{
-                background: "#ffffff",
-                borderRadius: "14px",
-                padding: "20px",
-                border: "1px solid #cbd5e1",
-                marginBottom: "32px"
-              }}>
-                <div style={{ position: "relative", marginBottom: "16px" }}>
-                  <FontAwesomeIcon icon={faSearch} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "14px" }} />
-                  <input
-                    type="text"
-                    placeholder="Search queries (e.g., insurance, cost, packing, office relocation)..."
-                    value={faqSearch}
-                    onChange={(e) => setFaqSearch(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "12px 40px 12px 42px",
-                      borderRadius: "10px",
-                      border: "1.5px solid #cbd5e1",
-                      background: "#f8fafc",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      color: "#0f172a",
-                      outline: "none"
-                    }}
-                  />
-                  {faqSearch && (
-                    <button
-                      onClick={() => setFaqSearch("")}
-                      style={{
-                        position: "absolute",
-                        right: "14px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "none",
-                        border: "none",
-                        color: "#94a3b8",
-                        cursor: "pointer",
-                        padding: "4px"
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faTimes} />
-                    </button>
-                  )}
-                </div>
-
-                {/* Categories */}
-                <div style={{
-                  display: "flex",
-                  gap: "6px",
-                  overflowX: "auto",
-                  paddingBottom: "2px"
-                }} className="hide-scrollbar">
-                  {faqCategories.map((category) => {
-                    const isActive = selectedFaqCategory === category;
-                    return (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedFaqCategory(category)}
-                        style={{
-                          padding: "8px 16px",
-                          borderRadius: "8px",
-                          border: "none",
-                          fontSize: "13px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          whiteSpace: "nowrap",
-                          background: isActive ? "#0045e6" : "#f1f5f9",
-                          color: isActive ? "#ffffff" : "#475569",
-                          transition: "all 0.15s ease"
-                        }}
-                      >
-                        {category}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* FAQ Accordion List */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <AnimatePresence mode="popLayout">
-                  {filteredFaqs.length > 0 ? (
-                    filteredFaqs.map((faq) => {
-                      const isOpen = activeFaq === faq.q;
-                      return (
-                        <div
-                          key={faq.q}
-                          style={{
-                            background: "#ffffff",
-                            borderRadius: "12px",
-                            border: isOpen ? "1px solid #bfdbfe" : "1px solid #cbd5e1",
-                            boxShadow: isOpen ? "0 4px 12px rgba(0, 69, 230, 0.08)" : "none",
-                            overflow: "hidden",
-                            transition: "border-color 0.2s"
-                          }}
-                        >
-                          <div
-                            onClick={() => toggleFaq(faq.q)}
-                            style={{
-                              padding: "16px 20px",
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              cursor: "pointer",
-                              userSelect: "none",
-                              background: isOpen ? "#eff6ff" : "transparent"
-                            }}
-                          >
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                              <FontAwesomeIcon icon={faQuestionCircle} style={{ color: isOpen ? "#0045e6" : "#94a3b8", fontSize: "14px" }} />
-                              <span style={{
-                                fontSize: "15px",
-                                fontWeight: "700",
-                                color: isOpen ? "#0045e6" : "#0f172a"
-                              }}>
-                                {faq.q}
-                              </span>
-                            </div>
-
-                            <div style={{
-                              width: "26px",
-                              height: "26px",
-                              borderRadius: "6px",
-                              background: isOpen ? "#0045e6" : "#f1f5f9",
-                              color: isOpen ? "#ffffff" : "#64748b",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "10px"
-                            }}>
-                              <FontAwesomeIcon 
-                                icon={faChevronDown} 
-                                style={{ 
-                                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", 
-                                  transition: "transform 0.2s" 
-                                }} 
-                              />
-                            </div>
-                          </div>
-
-                          <AnimatePresence initial={false}>
-                            {isOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                style={{ overflow: "hidden" }}
-                              >
-                                <div style={{
-                                  padding: "0 20px 20px 48px",
-                                  fontSize: "14px",
-                                  color: "#475569",
-                                  lineHeight: "1.6",
-                                  borderTop: "1px solid #f1f5f9"
-                                }}>
-                                  <p style={{ margin: 0, whiteSpace: "pre-line" }}>
-                                    {faq.a}
-                                  </p>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div style={{
-                      textAlign: "center",
-                      padding: "48px 24px",
-                      background: "#ffffff",
-                      borderRadius: "14px",
-                      border: "1px solid #cbd5e1"
-                    }}>
-                      <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>
-                        No Matching Queries Found
-                      </h4>
-                      <p style={{ fontSize: "13.5px", color: "#64748b", marginBottom: "16px" }}>
-                        We couldn't locate any questions matching "{faqSearch}".
-                      </p>
-                      <button
-                        onClick={() => {
-                          setFaqSearch("");
-                          setSelectedFaqCategory("All");
-                        }}
-                        style={{
-                          background: "#0045e6",
-                          color: "#ffffff",
-                          border: "none",
-                          padding: "9px 18px",
-                          borderRadius: "8px",
-                          fontWeight: "700",
-                          fontSize: "13px",
-                          cursor: "pointer"
-                        }}
-                      >
-                        Reset Search Filters
-                      </button>
-                    </div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </section>
 
         </div>
       </div>
@@ -2632,89 +2611,5 @@ const Feature = ({ number, icon, title, desc }) => (
     </div>
   </div>
 );
-
-// Standard FAQ Data
-const faqData = [
-  {
-    category: "Pricing & Booking",
-    q: "How much does packing and moving cost?",
-    a: "Pricing depends on distance, volume and services. Intra-city moves start from ₹1,000 for studio apartments, with fully itemized commercial quotes provided upfront.",
-  },
-  {
-    category: "Safety & Insurance",
-    q: "Is insurance included in the shifting contract?",
-    a: "Yes, comprehensive transit damage protection is included with every quote. High-value equipment can be covered with specialized indemnity riders.",
-  },
-  {
-    category: "Our Process",
-    q: "How long does the relocation process take?",
-    a: "Local metropolitan moves are completed same-day within 4 to 8 hours. Inter-city moves operate on strict line-haul schedules based on road transit distances.",
-  },
-  {
-    category: "Our Process",
-    q: "Do you provide industrial packing materials?",
-    a: "Yes, we deploy 5-ply corrugated boxes, bubble wraps, anti-static IT protection, foam wraps, and corner guards to ensure absolute safety.",
-  },
-  {
-    category: "Safety & Insurance",
-    q: "Can corporate clients track shipment transit live?",
-    a: "Yes, dedicated move coordinators provide satellite GPS status reports and milestone updates via WhatsApp and SMS throughout transit.",
-  },
-  {
-    category: "General",
-    q: "What areas and cities do you serve across India?",
-    a: "Packyatra operates across 50+ major metropolitan hubs and tier-2 cities with direct line-haul logistics routes.",
-  },
-  {
-    category: "Pricing & Booking",
-    q: "How do I request an official corporate quote?",
-    a: "You can configure your move online using our instant calculator or contact our dedicated enterprise accounts desk for an on-site survey.",
-  },
-  {
-    category: "Pricing & Booking",
-    q: "What corporate payment methods do you accept?",
-    a: "We accept corporate purchase orders, NEFT/RTGS bank transfers, UPI, and all major commercial credit cards with tax-deductible GST invoices.",
-  },
-  {
-    category: "Pricing & Booking",
-    q: "What is your reschedule or cancellation policy?",
-    a: "Commercial and residential moves can be rescheduled up to 24 hours prior to the dispatch window with zero penalty fees.",
-  },
-  {
-    category: "Our Process",
-    q: "Are there any restricted or hazardous items you do not transport?",
-    a: "For regulatory compliance, we do not transport flammable chemicals, explosives, compressed gases, or perishable foodstuffs.",
-  },
-  {
-    category: "General",
-    q: "What certifications do your handling crews hold?",
-    a: "Our logistics professionals have 16+ years of operational experience, complete background verification, and formal training in heavy equipment safety.",
-  },
-  {
-    category: "Our Process",
-    q: "Do you offer full post-move setup and unpacking?",
-    a: "Yes, our team unpacks, re-assembles modular furniture, and disposes of packaging materials at the destination facility.",
-  },
-  {
-    category: "General",
-    q: "Do you offer climate-controlled storage solutions?",
-    a: "Yes, we operate 24/7 CCTV-monitored, climate-regulated warehouse facilities with flexible short-term and enterprise long-term storage agreements.",
-  },
-  {
-    category: "General",
-    q: "How should our facility or household prepare for moving day?",
-    a: "We provide an interactive milestone checklist planner on this page to help streamline pre-move and moving-day tasks.",
-  },
-  {
-    category: "Safety & Insurance",
-    q: "What is the claim process in the unlikely event of transit damage?",
-    a: "Our claims desk registers the formal survey report within 24 hours and processes reimbursement or repair under our underwritten policy.",
-  },
-  {
-    category: "General",
-    q: "What sets Packyatra apart from standard packers and movers?",
-    a: "We provide enterprise SLAs, transparent fixed billing, dedicated single-point move coordinators, and background-bonded personnel.",
-  }
-];
 
 export default HomeSelection;
