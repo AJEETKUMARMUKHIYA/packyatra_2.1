@@ -1,38 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#09101d" />
-      <stop offset="100%" stop-color="#172554" />
+      <stop offset="0%" stop-color="#070D18" />
+      <stop offset="100%" stop-color="#0F2753" />
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A192F" />
+      <stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+    <linearGradient id="topFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <linearGradient id="leftFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="rightFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#1D4ED8" />
     </linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.35"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.45"/>
     </filter>
   </defs>
 
-  <!-- Rounded App Tile -->
+  <!-- App Rounded Base -->
   <rect width="128" height="128" rx="28" fill="url(#bgGrad)"/>
-  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
 
-  <!-- Official PackYatra Pin Emblem & Red House -->
-  <g transform="translate(18, 12) scale(1.0)" filter="url(#shadow)">
-    <!-- Blue Pin Dome -->
-    <path d="M 46 12 C 70 12 88 30 88 54 C 88 71 73 90 46 114 C 19 90 4 71 4 54 C 4 30 22 12 46 12 Z" fill="#2F74EE"/>
-    
-    <!-- Red House & Lower Pin Apex -->
-    <path d="M 46 42 L 76 68 L 76 82 L 46 114 L 16 82 L 16 68 Z" fill="#EF2329"/>
-    
-    <!-- White Facet Division Lines -->
-    <line x1="22" y1="28" x2="46" y2="52" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-    <line x1="70" y1="28" x2="46" y2="52" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-    <line x1="5" y1="54" x2="28" y2="54" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-    <line x1="87" y1="54" x2="64" y2="54" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-    <polyline points="16,68 46,42 76,68" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-    
-    <!-- White Chimney -->
-    <rect x="27" y="47" width="4.5" height="10" fill="#ffffff"/>
-    
-    <!-- Doorway Frame -->
-    <rect x="40" y="72" width="12" height="26" fill="#ffffff" rx="1.5"/>
-    <rect x="43" y="75" width="6" height="23" fill="#EF2329" rx="1"/>
+  <!-- Formal Corporate Shield & 3D Isometric Cube -->
+  <g transform="translate(16, 12)" filter="url(#shadow)">
+    <!-- Shield Body -->
+    <path 
+      d="M 22 8 L 74 8 C 84 8 90 14 90 24 L 90 54 C 90 74 58 90 48 95 C 38 90 6 74 6 54 L 6 24 C 6 14 12 8 22 8 Z" 
+      fill="url(#shieldGrad)"
+      stroke="#3B82F6"
+      stroke-width="2"
+    />
+
+    <!-- Inner Shield Inset Hairline -->
+    <path 
+      d="M 24 12 L 72 12 C 80 12 85 17 85 26 L 85 52 C 85 68 56 83 48 87 C 40 83 11 68 11 52 L 11 26 C 11 17 16 12 24 12 Z" 
+      fill="none"
+      stroke="rgba(255, 255, 255, 0.2)"
+      stroke-width="1"
+    />
+
+    <!-- 3D Isometric Freight Transit Cube -->
+    <!-- Top Face -->
+    <polygon points="48,22 72,35 48,48 24,35" fill="url(#topFace)" />
+    <!-- Forward Speed Arrow on Top Face -->
+    <path d="M 43 36 L 52 36 L 54 34 L 49 31 L 42 31 L 45 34 Z" fill="#FFFFFF" opacity="0.95"/>
+
+    <!-- Left Face ('P') -->
+    <polygon points="24,35 48,48 48,70 24,57" fill="url(#leftFace)" />
+    <!-- Stylized Architectural 'P' on Left Face -->
+    <path d="M 31 42 L 38 46 L 38 58 L 34 56 L 34 50 L 31 48 Z" fill="rgba(255, 255, 255, 0.28)"/>
+
+    <!-- Right Face ('Y') -->
+    <polygon points="48,48 72,35 72,57 48,70" fill="url(#rightFace)" />
+    <!-- Dynamic Transit Speed Stripe on Right Face -->
+    <polygon points="52,50 56,48 68,55 64,57" fill="rgba(255, 255, 255, 0.35)"/>
+
+    <!-- Cube Edges -->
+    <line x1="48" y1="48" x2="48" y2="70" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+    <line x1="24" y1="35" x2="48" y2="48" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+    <line x1="72" y1="35" x2="48" y2="48" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+
+    <!-- 5-Star Quality Laurel & Gold Star Seal -->
+    <path d="M 34 75 Q 48 80 62 75" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <polygon points="48,73 49.6,77 54,77 50.4,79.5 51.8,83.5 48,81 44.2,83.5 45.6,79.5 42,77 46.4,77" fill="#F59E0B"/>
   </g>
 </svg>

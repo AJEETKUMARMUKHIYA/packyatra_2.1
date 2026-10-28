@@ -1,27 +1,49 @@
-import React from "react";
+import React, { useId } from "react";
 
 /**
- * Official PackYatra Brand Logo
- * Matches official brand identity:
- * - "Pack" in corporate deep navy blue (#173878 / #ffffff in dark mode)
- * - Dynamic red upward arrow through the letter 'a' (#EF2329)
- * - Geometric Location Pin Emblem on right with faceted blue dome (#2F74EE),
- *   white divider facets, and central/bottom red house with doorway & pin point (#EF2329)
- * - "Yatra" in vibrant royal blue (#2F74EE / #60A5FA in dark mode)
- * - Subtitle "Relocation" with clean wide letter spacing
+ * Official PackYatra Formal Corporate Brand Logo
+ * 
+ * Formal Corporate Identity for PackYatra:
+ * - Architectural Heraldic Shield & 3D Isometric Transit Cube emblem
+ *   featuring safe packaging ('P'), onward journey ('Y'), directional speed arrow,
+ *   and 5-star gold service trust star.
+ * - Bold Corporate Wordmark: "PACK" in solid executive navy/white + "YATRA" in royal cobalt
+ * - Formal corporate accent wedge in refined amber gold
+ * - High-tracking formal sub-brand: "RELOCATIONS & LOGISTICS"
+ * 
+ * Props:
+ * - height: number (default 44)
+ * - className: string
+ * - style: object
+ * - isDark: boolean (for dark backgrounds like footers or dark banners)
+ * - showSubtitle: boolean (whether to render the tagline)
+ * - subtitle: string (custom tagline override)
  */
 const PackYatraLogo = ({ 
-  height = 46, 
+  height = 44, 
   className = "", 
   style = {},
   isDark = false,
-  showSubtitle = true
+  showSubtitle = true,
+  subtitle = "RELOCATIONS & LOGISTICS"
 }) => {
-  const navyColor = isDark ? "#ffffff" : "#173878";
-  const redColor = "#EF2329";
-  const blueColor = isDark ? "#60A5FA" : "#2F74EE";
-  const subtitleColor = isDark ? "#E2E8F0" : "#111827";
-  const viewBox = showSubtitle ? "15 18 450 262" : "15 18 450 222";
+  const uniqueId = useId().replace(/:/g, "_");
+
+  // Color Palette - Formal Corporate Logistics Tier
+  const navyColor = isDark ? "#FFFFFF" : "#0A192F";
+  const blueColor = isDark ? "#60A5FA" : "#1D4ED8";
+  const goldAccent = isDark ? "#F59E0B" : "#D97706";
+  const dividerColor = isDark ? "rgba(255, 255, 255, 0.16)" : "#E2E8F0";
+  const subtitleColor = isDark ? "#94A3B8" : "#475569";
+
+  // Gradient IDs
+  const shieldGradId = `pyShieldGrad_${uniqueId}`;
+  const topFaceGradId = `pyTopGrad_${uniqueId}`;
+  const leftFaceGradId = `pyLeftGrad_${uniqueId}`;
+  const rightFaceGradId = `pyRightGrad_${uniqueId}`;
+
+  // ViewBox calculation
+  const viewBox = showSubtitle ? "0 0 405 96" : "0 0 398 70";
 
   return (
     <div 
@@ -30,154 +52,274 @@ const PackYatraLogo = ({
         display: "inline-flex",
         alignItems: "center",
         userSelect: "none",
+        cursor: "pointer",
         transition: "transform 0.2s ease",
         ...style
       }}
-      aria-label="PackYatra Relocation Logo"
+      aria-label="PackYatra Relocations & Logistics"
     >
       <svg 
         viewBox={viewBox} 
         style={{ 
           height: `${height}px`, 
           width: "auto",
-          display: "block" 
+          display: "block",
+          overflow: "visible"
         }}
         aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <g id="packyatra-official-logo">
-          {/* ========================================================
-              WORD: "Pack" (LINE 1: X = 30 to 325, Y = 38 to 125)
-             ======================================================== */}
-          <g id="text-pack">
-            {/* Capital 'P' */}
-            <path 
-              d="M 30 38 L 76 38 C 90 38 98 47 98 65 C 98 83 90 92 76 92 L 52 92 L 52 125 L 30 125 Z M 52 54 L 52 76 L 74 76 C 80 76 84 72 84 65 C 84 58 80 54 74 54 Z" 
-              fill={navyColor} 
-            />
+        <defs>
+          {/* Outer Shield Gradient */}
+          <linearGradient id={shieldGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={isDark ? "#1E293B" : "#0A192F"} />
+            <stop offset="100%" stopColor={isDark ? "#0F172A" : "#1E3A8A"} />
+          </linearGradient>
 
-            {/* Lowercase 'a' */}
-            <path 
-              d="M 124 84 C 124 72 132 63 146 63 C 156 63 160 69 160 78 L 160 125 L 144 125 L 144 116 C 139 122 132 126 124 126 C 112 126 104 118 104 106 C 104 93 115 86 130 86 L 144 86 L 144 81 C 144 75 140 72 133 72 C 127 72 124 75 122 79 Z M 144 98 L 130 98 C 123 98 118 101 118 107 C 118 112 122 116 129 116 C 137 116 144 109 144 102 Z" 
-              fill={navyColor} 
-            />
+          {/* Cube Top Face Gradient (Transit Direction) */}
+          <linearGradient id={topFaceGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#2563EB" />
+          </linearGradient>
 
-            {/* Red Dynamic Arrow slicing through 'a' */}
-            <g id="red-forward-arrow">
+          {/* Cube Left Face Gradient (Packaging / Structural Base) */}
+          <linearGradient id={leftFaceGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#1E3A8A" />
+            <stop offset="100%" stopColor="#0F172A" />
+          </linearGradient>
+
+          {/* Cube Right Face Gradient (Delivery Speed) */}
+          <linearGradient id={rightFaceGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#1D4ED8" />
+          </linearGradient>
+        </defs>
+
+        {showSubtitle ? (
+          /* ==========================================================
+             FULL FORMAL LOCKUP WITH SUBTITLE (96px height)
+             ========================================================== */
+          <g id="packyatra-formal-full">
+            {/* --- FORMAL EMBLEM MARK (LEFT: X=4 to 92, Y=8 to 92) --- */}
+            <g id="formal-emblem" transform="translate(0, 0)">
+              {/* Outer Shield Body */}
               <path 
-                d="M 110 114 C 107 102 114 88 132 74 L 160 46 L 170 56 L 145 80 C 136 89 133 97 136 105 C 138 111 132 115 124 115 C 118 115 113 115 110 114 Z" 
-                fill={redColor} 
+                d="M 22 10 L 74 10 C 84 10 90 16 90 26 L 90 54 C 90 73 58 88 48 92 C 38 88 6 73 6 54 L 6 26 C 6 16 12 10 22 10 Z" 
+                fill={`url(#${shieldGradId})`}
+                stroke={isDark ? "rgba(96, 165, 250, 0.45)" : "rgba(37, 99, 235, 0.3)"}
+                strokeWidth="1.8"
               />
-              {/* Triangular Arrowhead pointing top-right */}
-              <polygon points="156,33 174,62 145,57" fill={redColor} />
+
+              {/* Inner Shield Inset Hairline for Prestige Heraldry */}
+              <path 
+                d="M 24 14 L 72 14 C 80 14 86 19 86 28 L 86 52 C 86 68 56 82 48 86 C 40 82 10 68 10 52 L 10 28 C 10 19 16 14 24 14 Z" 
+                fill="none"
+                stroke={isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(255, 255, 255, 0.18)"}
+                strokeWidth="1"
+              />
+
+              {/* 3D Isometric Freight Transit Cube */}
+              {/* Top Face (Roof / Forward Journey) */}
+              <polygon 
+                points="48,24 72,37 48,50 24,37" 
+                fill={`url(#${topFaceGradId})`} 
+              />
+              {/* Forward Speed Arrow on Top Face */}
+              <path 
+                d="M 43 38 L 52 38 L 54 36 L 49 33 L 42 33 L 45 36 Z" 
+                fill="#FFFFFF" 
+                opacity="0.95"
+              />
+
+              {/* Left Face ('P' Structural Face) */}
+              <polygon 
+                points="24,37 48,50 48,72 24,59" 
+                fill={`url(#${leftFaceGradId})`} 
+              />
+              {/* Stylized Architectural 'P' Emboss on Left Face */}
+              <path 
+                d="M 31 44 L 38 48 L 38 60 L 34 58 L 34 52 L 31 50 Z" 
+                fill="rgba(255, 255, 255, 0.25)" 
+              />
+              <path 
+                d="M 34 46 L 41 50 C 44 52 44 55 41 56 L 38 55 L 38 51 L 34 49 Z" 
+                fill="rgba(255, 255, 255, 0.35)" 
+              />
+
+              {/* Right Face ('Y' Transit Face) */}
+              <polygon 
+                points="48,50 72,37 72,59 48,72" 
+                fill={`url(#${rightFaceGradId})`} 
+              />
+              {/* Dynamic Transit Speed Stripe on Right Face */}
+              <polygon 
+                points="52,52 56,50 68,57 64,59" 
+                fill="rgba(255, 255, 255, 0.3)" 
+              />
+              <polygon 
+                points="54,58 58,56 68,62 64,64" 
+                fill="rgba(255, 255, 255, 0.18)" 
+              />
+
+              {/* Cube Edges Definition */}
+              <line x1="48" y1="50" x2="48" y2="72" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="24" y1="37" x2="48" y2="50" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="72" y1="37" x2="48" y2="50" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+
+              {/* 5-Star Quality Laurel & Gold Star Seal */}
+              <path 
+                d="M 34 76 Q 48 81 62 76" 
+                stroke={goldAccent} 
+                strokeWidth="1.8" 
+                strokeLinecap="round" 
+                fill="none" 
+              />
+              <polygon 
+                points="48,74 49.6,78 54,78 50.4,80.5 51.8,84.5 48,82 44.2,84.5 45.6,80.5 42,78 46.4,78" 
+                fill={goldAccent} 
+              />
             </g>
 
-            {/* Lowercase 'c' */}
-            <path 
-              d="M 236 83 C 233 71 223 63 210 63 C 193 63 181 75 181 97 C 181 118 193 131 210 131 C 223 131 233 123 236 110 L 220 110 C 218 116 215 119 210 119 C 201 119 196 109 196 97 C 196 84 201 74 210 74 C 215 74 218 78 220 83 Z" 
-              fill={navyColor} 
-            />
+            {/* --- FORMAL WORDMARK (RIGHT: X=108 to 400) --- */}
+            <g id="formal-wordmark">
+              {/* Primary Name: PACK */}
+              <text 
+                x="108" 
+                y="52" 
+                fill={navyColor} 
+                fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+                fontSize="41" 
+                fontWeight="900" 
+                letterSpacing="-0.03em"
+              >
+                PACK
+              </text>
 
-            {/* Lowercase 'k' with sharp diagonal branch */}
-            <path 
-              d="M 250 38 L 270 38 L 270 82 L 296 62 L 320 62 L 290 88 L 320 125 L 298 125 L 276 97 L 270 103 L 270 125 L 250 125 Z" 
-              fill={navyColor} 
-            />
+              {/* Primary Name: YATRA */}
+              <text 
+                x="234" 
+                y="52" 
+                fill={blueColor} 
+                fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+                fontSize="41" 
+                fontWeight="900" 
+                letterSpacing="-0.03em"
+              >
+                YATRA
+              </text>
+
+              {/* Corporate Precision Gold Wedge */}
+              <polygon 
+                points="380,24 388,24 382,52 374,52" 
+                fill={goldAccent} 
+              />
+
+              {/* Architectural Separation Rule */}
+              <line 
+                x1="109" 
+                y1="64" 
+                x2="388" 
+                y2="64" 
+                stroke={dividerColor} 
+                strokeWidth="1.4" 
+                strokeLinecap="round" 
+              />
+
+              {/* Formal Subtitle Tagline */}
+              <text 
+                x="110" 
+                y="81" 
+                fill={subtitleColor} 
+                fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+                fontSize="10.8" 
+                fontWeight="800" 
+                letterSpacing="0.32em"
+              >
+                {subtitle}
+              </text>
+            </g>
           </g>
+        ) : (
+          /* ==========================================================
+             COMPACT HORIZONTAL LOCKUP (NO SUBTITLE - 70px height)
+             ========================================================== */
+          <g id="packyatra-formal-compact">
+            {/* --- COMPACT EMBLEM MARK --- */}
+            <g id="formal-emblem-compact" transform="translate(0, -6)">
+              {/* Outer Shield Body */}
+              <path 
+                d="M 22 14 L 74 14 C 84 14 90 20 90 30 L 90 52 C 90 69 58 82 48 86 C 38 82 6 69 6 52 L 6 30 C 6 20 12 14 22 14 Z" 
+                fill={`url(#${shieldGradId})`}
+                stroke={isDark ? "rgba(96, 165, 250, 0.45)" : "rgba(37, 99, 235, 0.3)"}
+                strokeWidth="1.8"
+              />
 
-          {/* ========================================================
-              MAP LOCATION PIN EMBLEM WITH RED HOUSE
-              (RIGHT OF "Pack": X = 340 to 430, Y = 26 to 135)
-             ======================================================== */}
-          <g id="pin-emblem">
-            {/* Outer Blue Pin Body Dome */}
-            <path 
-              d="M 385 26 C 410 26 430 46 430 71 C 430 89 414 109 385 135 C 356 109 340 89 340 71 C 340 46 360 26 385 26 Z" 
-              fill={blueColor} 
-            />
+              {/* 3D Isometric Freight Cube */}
+              <polygon 
+                points="48,25 70,37 48,49 26,37" 
+                fill={`url(#${topFaceGradId})`} 
+              />
+              <path 
+                d="M 44 38 L 51 38 L 53 36 L 49 33 L 43 33 L 46 36 Z" 
+                fill="#FFFFFF" 
+                opacity="0.95"
+              />
 
-            {/* Red House & Lower Pin Apex */}
-            <path 
-              d="M 385 58 L 418 86 L 418 102 L 385 135 L 352 102 L 352 86 Z" 
-              fill={redColor} 
-            />
+              <polygon 
+                points="26,37 48,49 48,68 26,56" 
+                fill={`url(#${leftFaceGradId})`} 
+              />
+              <polygon 
+                points="48,49 70,37 70,56 48,68" 
+                fill={`url(#${rightFaceGradId})`} 
+              />
 
-            {/* White division lines across the blue dome */}
-            <line x1="358" y1="42" x2="385" y2="68" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" />
-            <line x1="412" y1="42" x2="385" y2="68" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" />
-            <line x1="341" y1="71" x2="368" y2="71" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" />
-            <line x1="429" y1="71" x2="402" y2="71" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" />
+              {/* Cube Edges */}
+              <line x1="48" y1="49" x2="48" y2="68" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="26" y1="37" x2="48" y2="49" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="70" y1="37" x2="48" y2="49" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
 
-            {/* White outline along the roof slope */}
-            <polyline 
-              points="352,86 385,58 418,86" 
-              fill="none" 
-              stroke="#ffffff" 
-              strokeWidth="3.5" 
-              strokeLinejoin="round" 
-              strokeLinecap="round" 
-            />
+              {/* Gold Star */}
+              <polygon 
+                points="48,71 49.3,74.5 53,74.5 50,76.5 51.2,80 48,78 44.8,80 46,76.5 43,74.5 46.7,74.5" 
+                fill={goldAccent} 
+              />
+            </g>
 
-            {/* White chimney on left roof slope */}
-            <rect x="364" y="64" width="5" height="11" fill="#ffffff" />
+            {/* --- COMPACT WORDMARK --- */}
+            <g id="formal-wordmark-compact">
+              <text 
+                x="106" 
+                y="48" 
+                fill={navyColor} 
+                fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+                fontSize="41" 
+                fontWeight="900" 
+                letterSpacing="-0.03em"
+              >
+                PACK
+              </text>
 
-            {/* White doorway outline in house body */}
-            <rect x="378" y="90" width="14" height="30" fill="#ffffff" rx="1.5" />
-            {/* Inner red door */}
-            <rect x="381" y="93" width="8" height="27" fill={redColor} rx="1" />
+              <text 
+                x="232" 
+                y="48" 
+                fill={blueColor} 
+                fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+                fontSize="41" 
+                fontWeight="900" 
+                letterSpacing="-0.03em"
+              >
+                YATRA
+              </text>
+
+              {/* Corporate Precision Gold Wedge */}
+              <polygon 
+                points="378,20 386,20 380,48 372,48" 
+                fill={goldAccent} 
+              />
+            </g>
           </g>
-
-          {/* ========================================================
-              WORD: "Yatra" (LINE 2: X = 30 to 348, Y = 148 to 225)
-             ======================================================== */}
-          <g id="text-yatra">
-            {/* Capital 'Y' */}
-            <path 
-              d="M 30 148 L 52 148 L 65 182 L 78 148 L 100 148 L 74 198 L 74 225 L 56 225 L 56 198 Z" 
-              fill={blueColor} 
-            />
-
-            {/* Lowercase 'a' */}
-            <path 
-              d="M 122 188 C 122 174 131 166 147 166 C 159 166 164 173 164 183 L 164 225 L 148 225 L 148 217 C 143 223 135 227 126 227 C 113 227 104 219 104 207 C 104 193 116 186 134 186 L 148 186 L 148 181 C 148 176 144 173 136 173 C 130 173 126 176 124 180 Z M 148 199 L 134 199 C 126 199 120 202 120 207 C 120 212 125 216 132 216 C 141 216 148 210 148 202 Z" 
-              fill={blueColor} 
-            />
-
-            {/* Lowercase 't' */}
-            <path 
-              d="M 178 152 L 194 152 L 194 167 L 208 167 L 208 180 L 194 180 L 194 212 C 194 216 196 218 201 218 L 208 218 L 208 226 L 196 226 C 182 226 178 220 178 210 L 178 180 L 170 180 L 170 167 L 178 167 Z" 
-              fill={blueColor} 
-            />
-
-            {/* Lowercase 'r' */}
-            <path 
-              d="M 220 167 L 236 167 L 236 177 C 239 171 245 167 253 167 L 257 167 L 257 182 L 251 182 C 241 182 236 188 236 199 L 236 225 L 220 225 Z" 
-              fill={blueColor} 
-            />
-
-            {/* Lowercase 'a' */}
-            <path 
-              d="M 276 188 C 276 174 285 166 301 166 C 313 166 318 173 318 183 L 318 225 L 302 225 L 302 217 C 297 223 289 227 280 227 C 267 227 258 219 258 207 C 258 193 270 186 288 186 L 302 186 L 302 181 C 302 176 298 173 290 173 C 284 173 280 176 278 180 Z M 302 199 L 288 199 C 280 199 274 202 274 207 C 274 212 279 216 286 216 C 295 216 302 210 302 202 Z" 
-              fill={blueColor} 
-            />
-          </g>
-
-          {/* ========================================================
-              SUBTITLE: "Relocation" (LINE 3: Y = 258)
-             ======================================================== */}
-          {showSubtitle && (
-            <text 
-              x="32" 
-              y="258" 
-              fontFamily="'Inter', 'Montserrat', 'Segoe UI', system-ui, sans-serif" 
-              fontSize="19.5" 
-              fontWeight="500" 
-              fill={subtitleColor} 
-              letterSpacing="16.5"
-            >
-              Relocation
-            </text>
-          )}
-        </g>
+        )}
       </svg>
     </div>
   );

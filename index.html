@@ -32,52 +32,6 @@
   <!-- React app entry for Vite -->
   <script type="module" src="/src/index.jsx"></script>
 
-  <script>
-    // Emergency mobile menu fix
-    document.addEventListener('DOMContentLoaded', function() {
-      function fixMobileMenu() {
-        const menuBtn = document.querySelector('.mobile-menu-btn');
-        const navMenu = document.querySelector('.nav-container');
-        const overlay = document.querySelector('.menu-overlay');
-
-        if (menuBtn && navMenu) {
-          const newBtn = menuBtn.cloneNode(true);
-          menuBtn.parentNode.replaceChild(newBtn, menuBtn);
-
-          document.querySelector('.mobile-menu-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const currentNav = document.querySelector('.nav-container');
-            const currentBtn = document.querySelector('.mobile-menu-btn');
-            const currentOverlay = document.querySelector('.menu-overlay');
-
-            if (currentNav) currentNav.classList.toggle('active');
-            if (currentBtn) currentBtn.classList.toggle('active');
-            if (currentOverlay) currentOverlay.classList.toggle('active');
-
-            document.body.style.overflow = currentNav.classList.contains('active') ? 'hidden' : '';
-          });
-
-          if (overlay) {
-            overlay.addEventListener('click', function() {
-              const nav = document.querySelector('.nav-container');
-              const btn = document.querySelector('.mobile-menu-btn');
-
-              if (nav) nav.classList.remove('active');
-              if (btn) btn.classList.remove('active');
-              this.classList.remove('active');
-              document.body.style.overflow = '';
-            });
-          }
-        } else {
-          setTimeout(fixMobileMenu, 500);
-        }
-      }
-
-      fixMobileMenu();
-    });
-  </script>
 </body>
 
 </html>

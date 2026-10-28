@@ -498,22 +498,6 @@ const FixedMovingFormAdmin = ({
                 />
               </div>
             </div>
-
-            <div style={{
-              background: "rgba(37, 99, 235, 0.08)",
-              border: "1px solid rgba(37, 99, 235, 0.2)",
-              borderRadius: "10px",
-              padding: "8px 12px",
-              fontSize: "11.5px",
-              color: "#1d4ed8",
-              fontWeight: "600",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px"
-            }}>
-              <FontAwesomeIcon icon={faCheckCircle} />
-              <span>Intra-City shifting pricing applied</span>
-            </div>
           </div>
         )}
 

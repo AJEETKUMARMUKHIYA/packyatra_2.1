@@ -17,7 +17,6 @@ import {
   Star, 
   HelpCircle, 
   ArrowRight, 
-  ShieldCheck,
   X,
   Menu,
   Clock,
@@ -62,10 +61,36 @@ const Header = ({ onLoginStatusChange }) => {
   /* ======================
      AUTO CLOSE ON ROUTE CHANGE
   ====================== */
-  useEffect(() => {
+  const closeMenu = (e) => {
+    if (e) {
+      if (typeof e.preventDefault === "function") e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+    }
     setMenuOpen(false);
-    setServicesDropdownOpen(false);
     setMobileServicesOpen(false);
+    const nav = document.querySelector(".nav-container");
+    if (nav) nav.classList.remove("active");
+    const overlay = document.querySelector(".menu-overlay");
+    if (overlay) overlay.classList.remove("active");
+    const btn = document.querySelector(".mobile-menu-btn");
+    if (btn) btn.classList.remove("open", "active");
+    document.body.style.overflow = "auto";
+  };
+
+  const toggleMenu = (e) => {
+    if (e) {
+      if (typeof e.preventDefault === "function") e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+    }
+    if (menuOpen) {
+      closeMenu();
+    } else {
+      setMenuOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    closeMenu();
     document.body.style.overflow = "auto";
   }, [location.pathname]);
 
@@ -85,8 +110,7 @@ const Header = ({ onLoginStatusChange }) => {
   useEffect(() => {
     const esc = (e) => {
       if (e.key === "Escape") {
-        setMenuOpen(false);
-        setServicesDropdownOpen(false);
+        closeMenu();
       }
     };
     window.addEventListener("keydown", esc);
@@ -270,13 +294,8 @@ const Header = ({ onLoginStatusChange }) => {
          ======================================================== */}
       <div className="top-bar">
         <div className="top-bar-container">
-          {/* Left: Contact Info & Verified Badge */}
+          {/* Left: Contact Info */}
           <div className="contact-top">
-            <span className="trust-pill">
-              <ShieldCheck size={12} className="trust-icon" />
-              <span>Verified Pan-India Carrier</span>
-            </span>
-            <span className="contact-divider">/</span>
             <span className="contact-item">
               <Phone size={12} className="contact-icon" />
               <a href="tel:+919071535535" title="Click to call PackYatra 24/7 Hotline">+91 90715 35535</a>
@@ -482,8 +501,9 @@ const Header = ({ onLoginStatusChange }) => {
 
           {/* HAMBURGER BUTTON (MOBILE) */}
           <button
-            className={`mobile-menu-btn ${menuOpen ? "open" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
+            type="button"
+            className={`mobile-menu-btn ${menuOpen ? "open active" : ""}`}
+            onClick={toggleMenu}
             aria-label="Toggle Navigation Menu"
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -491,22 +511,34 @@ const Header = ({ onLoginStatusChange }) => {
         </div>
 
         {/* OVERLAY FOR MOBILE DRAWER */}
-        {menuOpen && <div className="menu-overlay" onClick={() => setMenuOpen(false)} />}
+        {menuOpen && (
+          <div 
+            className="menu-overlay" 
+            onClick={closeMenu} 
+            onTouchEnd={closeMenu}
+            role="button"
+            aria-label="Close menu"
+            tabIndex={0}
+          />
+        )}
 
         {/* MOBILE NAVIGATION DRAWER */}
-        <nav className={`nav-container ${menuOpen ? "active" : ""}`}>
+        <nav className={`nav-container ${menuOpen ? "active" : ""}`} aria-label="Mobile Navigation">
           <div className="mobile-menu-header">
             <div 
               className="logo-container" 
-              onClick={() => { setMenuOpen(false); navigate("/"); }} 
+              onClick={() => { closeMenu(); navigate("/"); }} 
               style={{ cursor: "pointer" }}
             >
               <PackYatraLogo height={38} />
             </div>
             <button 
+              type="button"
               className="mobile-close-btn" 
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
+              onTouchEnd={closeMenu}
               aria-label="Close menu"
+              title="Close menu"
             >
               <X size={20} />
             </button>
@@ -514,7 +546,7 @@ const Header = ({ onLoginStatusChange }) => {
 
           {/* Mobile Quick Action Strip */}
           <div className="mobile-quick-strip">
-            <a href="tel:+919071535535" className="quick-action-pill call">
+            <a href="tel:+919071535535" className="quick-action-pill call" onClick={closeMenu}>
               <Phone size={13} />
               <span>Call Hotline</span>
             </a>
@@ -523,11 +555,12 @@ const Header = ({ onLoginStatusChange }) => {
               target="_blank" 
               rel="noreferrer" 
               className="quick-action-pill whatsapp"
+              onClick={closeMenu}
             >
               <MessageSquare size={13} />
               <span>WhatsApp</span>
             </a>
-            <button onClick={openTrackShipment} className="quick-action-pill track">
+            <button onClick={() => { closeMenu(); openTrackShipment(); }} className="quick-action-pill track" type="button">
               <Truck size={13} />
               <span>Track</span>
             </button>
@@ -540,7 +573,7 @@ const Header = ({ onLoginStatusChange }) => {
                 <NavLink 
                   to="/" 
                   end
-                  onClick={() => setMenuOpen(false)} 
+                  onClick={closeMenu} 
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   <HomeIcon size={16} />
@@ -551,6 +584,7 @@ const Header = ({ onLoginStatusChange }) => {
               {/* Expandable Services Accordion */}
               <li className="mobile-accordion-item">
                 <button 
+                  type="button"
                   className="mobile-accordion-toggle"
                   onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
                 >
@@ -569,7 +603,7 @@ const Header = ({ onLoginStatusChange }) => {
                         <div 
                           key={srv.id}
                           className="mobile-service-subitem"
-                          onClick={() => scrollToSection("services")}
+                          onClick={() => { closeMenu(); scrollToSection("services"); }}
                         >
                           <div className="subitem-icon" style={{ color: srv.color }}>
                             <Icon size={14} />
@@ -589,7 +623,7 @@ const Header = ({ onLoginStatusChange }) => {
                 <button 
                   type="button" 
                   className="mobile-link-btn"
-                  onClick={() => scrollToSection("estimator")}
+                  onClick={() => { closeMenu(); scrollToSection("estimator"); }}
                 >
                   <Calculator size={16} />
                   <span>Instant Cost Estimator</span>
@@ -600,7 +634,7 @@ const Header = ({ onLoginStatusChange }) => {
                 <button 
                   type="button" 
                   className="mobile-link-btn"
-                  onClick={() => scrollToSection("planner")}
+                  onClick={() => { closeMenu(); scrollToSection("planner"); }}
                 >
                   <ClipboardList size={16} />
                   <span>Moving Checklist Planner</span>
@@ -610,7 +644,7 @@ const Header = ({ onLoginStatusChange }) => {
               <li>
                 <NavLink 
                   to="/faq" 
-                  onClick={() => setMenuOpen(false)} 
+                  onClick={closeMenu} 
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   <HelpCircle size={16} />
@@ -621,7 +655,7 @@ const Header = ({ onLoginStatusChange }) => {
               <li>
                 <NavLink 
                   to="/about" 
-                  onClick={() => setMenuOpen(false)} 
+                  onClick={closeMenu} 
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   <Building2 size={16} />
@@ -632,7 +666,7 @@ const Header = ({ onLoginStatusChange }) => {
               <li>
                 <NavLink 
                   to="/contact" 
-                  onClick={() => setMenuOpen(false)} 
+                  onClick={closeMenu} 
                   className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   <Phone size={16} />
@@ -644,13 +678,13 @@ const Header = ({ onLoginStatusChange }) => {
 
           {/* Bottom Actions */}
           <div className="mobile-actions">
-            <button className="mobile-quote-btn" onClick={handleQuoteClick}>
+            <button type="button" className="mobile-quote-btn" onClick={() => { closeMenu(); handleQuoteClick(); }}>
               <Sparkles size={15} />
               <span>Get Free Instant Quote</span>
             </button>
 
             {!user ? (
-              <button className="mobile-login-btn" onClick={openLogin}>
+              <button type="button" className="mobile-login-btn" onClick={() => { closeMenu(); openLogin(); }}>
                 <LogIn size={15} />
                 <span>Login / Register</span>
               </button>

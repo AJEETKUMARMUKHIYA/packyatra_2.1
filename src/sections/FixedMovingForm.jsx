@@ -749,23 +749,6 @@ const FixedMovingForm = ({
                 />
               </div>
             </div>
-
-            {/* Same Society Pricing Logic Tag */}
-            <div style={{
-              background: "rgba(0, 69, 230, 0.06)",
-              border: "1px solid rgba(0, 69, 230, 0.16)",
-              borderRadius: "8px",
-              padding: "7px 10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontSize: "11px",
-              color: "#0045e6",
-              fontWeight: "600"
-            }}>
-              <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: "11px", color: "#0045e6" }} />
-              <span>Intra-City shifting pricing applied (full labor, packing & moving)</span>
-            </div>
           </div>
         )}
 
