@@ -1,0 +1,326 @@
+/* =========================================================
+   WHY CHOOSE PACKYATRA - BENTO GRID COMPONENT STYLES
+   Executive, sleek, elevated value propositions
+   ========================================================= */
+
+.why-choose-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.why-choose-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.why-choose-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 3rem;
+}
+
+.why-choose-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 9999px;
+  color: #0045e6;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.why-choose-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #0045e6;
+  display: inline-block;
+  box-shadow: 0 0 8px rgba(0, 69, 230, 0.5);
+}
+
+.why-choose-title {
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin-bottom: 12px;
+}
+
+.why-choose-subtitle {
+  font-size: 15.5px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+/* Bento Grid */
+.why-choose-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* Base Card Styling */
+.why-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.why-card:hover {
+  transform: translateY(-3px);
+  border-color: #93c5fd;
+  box-shadow: 0 14px 30px -8px rgba(0, 69, 230, 0.12);
+}
+
+/* Icon Container */
+.why-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.why-card:hover .why-icon-box {
+  transform: scale(1.08);
+}
+
+.why-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.why-card-desc {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.why-pill-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+/* Central Featured Brand Card */
+.why-card-center {
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1.5px solid #93c5fd;
+  box-shadow: 0 8px 24px -4px rgba(0, 69, 230, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+.why-card-center::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.why-card-center .why-card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0045e6;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.why-card-center .why-card-desc {
+  font-size: 13.5px;
+  color: #1e3a8a;
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+.why-card-center-cta {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #0045e6;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 69, 230, 0.25);
+}
+
+.why-card-center-cta:hover {
+  background: #0033aa;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 69, 230, 0.35);
+}
+
+/* Grid Column Spans matching User's Bento Grid */
+/* Row 1 */
+.why-col-economical {
+  grid-column: span 2;
+}
+
+.why-col-ontime {
+  grid-column: span 2;
+}
+
+.why-col-reschedule {
+  grid-column: span 3;
+}
+
+.why-col-electrical {
+  grid-column: span 5;
+}
+
+/* Row 2 */
+.why-col-damageproof {
+  grid-column: span 3;
+}
+
+.why-col-center {
+  grid-column: span 5;
+}
+
+.why-col-support {
+  grid-column: span 2;
+}
+
+.why-col-editbooking {
+  grid-column: span 2;
+}
+
+/* Row 3 */
+.why-col-addons {
+  grid-column: span 3;
+}
+
+.why-col-ropepulling {
+  grid-column: span 4;
+}
+
+.why-col-cancellation {
+  grid-column: span 5;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1080px) {
+  .why-choose-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+  }
+
+  .why-col-economical {
+    grid-column: span 3;
+  }
+  .why-col-ontime {
+    grid-column: span 3;
+  }
+  .why-col-reschedule {
+    grid-column: span 3;
+  }
+  .why-col-electrical {
+    grid-column: span 3;
+  }
+  
+  .why-col-center {
+    grid-column: span 6;
+    order: -1; /* Bring brand card top on tablets */
+  }
+
+  .why-col-damageproof {
+    grid-column: span 3;
+  }
+  .why-col-support {
+    grid-column: span 3;
+  }
+  .why-col-editbooking {
+    grid-column: span 3;
+  }
+  .why-col-addons {
+    grid-column: span 3;
+  }
+  .why-col-ropepulling {
+    grid-column: span 3;
+  }
+  .why-col-cancellation {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 680px) {
+  .why-choose-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+
+  .why-choose-header {
+    margin-bottom: 2rem;
+  }
+
+  .why-choose-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .why-col-economical,
+  .why-col-ontime,
+  .why-col-reschedule,
+  .why-col-electrical,
+  .why-col-damageproof,
+  .why-col-center,
+  .why-col-support,
+  .why-col-editbooking,
+  .why-col-addons,
+  .why-col-ropepulling,
+  .why-col-cancellation {
+    grid-column: span 1;
+  }
+
+  .why-card {
+    padding: 20px 16px;
+  }
+}

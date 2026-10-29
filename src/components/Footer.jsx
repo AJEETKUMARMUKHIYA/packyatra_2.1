@@ -172,6 +172,12 @@ const Footer = () => {
                 <span>Privacy Policy</span>
               </a>
             </li>
+            <li>
+              <a href="/sitemap">
+                <ArrowRight size={12} className="arrow-icon" />
+                <span>Sitemap</span>
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -240,6 +246,8 @@ const Footer = () => {
               <a href="/refund-policy">Payments</a>
               <span className="legal-dot">•</span>
               <a href="/privacy-policy">Privacy</a>
+              <span className="legal-dot">•</span>
+              <a href="/sitemap">Sitemap</a>
             </div>
           </div>
         </div>

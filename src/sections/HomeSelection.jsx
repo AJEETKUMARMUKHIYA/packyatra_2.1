@@ -39,6 +39,7 @@ import packyatraLuxuryRelocationImg from "../assets/images/packyatra_luxury_relo
 import packyatraCityExpressImg from "../assets/images/packyatra_express_city_1791910627301.jpg";
 import packyatraTerminalFleetImg from "../assets/images/packyatra_fleet_corporate_1791709011422.jpg";
 import packyatraCrewImg from "../assets/images/packyatra_crew_packing_1790740227823.jpg";
+import WhyChoosePackYatra from "../components/WhyChoosePackYatra.jsx";
 import "../styles/app-styles.css";
 
 const HomeSelection = ({ onLoginStatusChange }) => {
@@ -933,6 +934,34 @@ const HomeSelection = ({ onLoginStatusChange }) => {
                 <button
                   type="button"
                   onClick={() => {
+                    const el = document.getElementById("why-choose-packyatra");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    background: "#f8fafc",
+                    color: "#334155",
+                    border: "1px solid #cbd5e1",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0045e6"; e.currentTarget.style.color = "#0045e6"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#334155"; }}
+                >
+                  <FontAwesomeIcon icon={faShieldAlt} style={{ fontSize: "11px", color: "#0045e6" }} />
+                  <span>Why PackYatra</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
                     const el = document.getElementById("services");
                     if (el) el.scrollIntoView({ behavior: "smooth" });
                   }}
@@ -1065,6 +1094,11 @@ const HomeSelection = ({ onLoginStatusChange }) => {
               </div>
             </div>
           </nav>
+
+          {/* =========================================================
+              WHY CHOOSE PACKYATRA - BENTO GRID GUARANTEES & PERKS
+             ========================================================= */}
+          <WhyChoosePackYatra />
 
           {/* =========================================================
               EXECUTIVE SERVICES SECTION

@@ -1,0 +1,349 @@
+/* ========================================================
+   SITEMAP PAGE STYLES
+   ======================================================== */
+.sitemap-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  padding-bottom: 80px;
+}
+
+/* Hero Section */
+.sitemap-hero {
+  position: relative;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+  color: #ffffff;
+  padding: 60px 24px 50px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.sitemap-hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.25), transparent 70%);
+  pointer-events: none;
+}
+
+.sitemap-hero-container {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.sitemap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #60a5fa;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sitemap-title {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 14px 0;
+  letter-spacing: -0.5px;
+}
+
+.sitemap-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* XML Quick Bar */
+.sitemap-xml-banner {
+  max-width: 1140px;
+  margin: -24px auto 36px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 3;
+}
+
+.sitemap-xml-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 28px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sitemap-xml-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sitemap-xml-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sitemap-xml-text h3 {
+  margin: 0 0 4px 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sitemap-xml-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.sitemap-xml-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-xml-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-xml-view:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-xml-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-xml-copy:hover {
+  background: #e2e8f0;
+}
+
+/* Main Directory Grid */
+.sitemap-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.sitemap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 860px) {
+  .sitemap-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sitemap-section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sitemap-section-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.sitemap-section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sitemap-header-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sitemap-header-icon.blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.sitemap-header-icon.amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.sitemap-header-icon.emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.sitemap-header-icon.purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.sitemap-section-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sitemap-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sitemap-link-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.sitemap-link-item:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateX(3px);
+}
+
+.sitemap-link-content {
+  flex: 1;
+}
+
+.sitemap-link-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #0f172a;
+  margin-bottom: 3px;
+}
+
+.sitemap-link-desc {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.sitemap-link-url {
+  font-size: 11px;
+  font-family: monospace;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.sitemap-link-arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-top: 4px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sitemap-link-item:hover .sitemap-link-arrow {
+  color: #2563eb;
+  transform: translateX(3px);
+}
+
+/* Metadata Footer Bar */
+.sitemap-meta-box {
+  margin-top: 40px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sitemap-meta-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sitemap-meta-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.sitemap-meta-subtitle {
+  font-size: 12px;
+  color: #64748b;
+}

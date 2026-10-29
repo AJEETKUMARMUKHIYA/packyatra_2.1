@@ -21,6 +21,7 @@ import FAQ from "./pages/FAQ.jsx";
 import TermsAndConditions from "./pages/TermsAndConditions.jsx";
 import RefundPolicy from "./pages/Refaundpolicy.jsx";
 import PravacyPolicies from "./pages/Privacypolicy.jsx";
+import Sitemap from "./pages/Sitemap.jsx";
 
 
 import UserProfile from './components/UserProfile';
@@ -83,6 +84,7 @@ const App = () => {
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/privacy-policy" element={<PravacyPolicies />} />
+            <Route path="/sitemap" element={<Sitemap />} />
 
           </Routes>
         </main>
