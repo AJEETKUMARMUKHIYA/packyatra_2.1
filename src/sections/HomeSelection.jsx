@@ -268,10 +268,11 @@ const HomeSelection = ({ onLoginStatusChange }) => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const handleCheckPrices = () => {
+  const handleCheckPrices = (overrideFrom, overrideTo, overridePickupFlat, overrideDropFlat) => {
     // Same Apartment Shifting Price Logic (uses Intra-City base pricing)
     if (activeTab === "same_apartment") {
-      if (!fromAddress) {
+      const baseAddr = overrideFrom || fromAddress;
+      if (!baseAddr) {
         setError("Please enter and select your Apartment / Society complex address.");
         return;
       }
@@ -281,11 +282,29 @@ const HomeSelection = ({ onLoginStatusChange }) => {
       }
 
       setError("");
+      const pFlat = overridePickupFlat || localStorage.getItem("pickupFlat") || "";
+      const dFlat = overrideDropFlat || localStorage.getItem("dropFlat") || "";
+
+      let finalFrom = baseAddr;
+      let finalTo = overrideTo || toAddress || baseAddr;
+
+      if (pFlat && !finalFrom.includes(`(Pickup: ${pFlat})`)) {
+        finalFrom = `${finalFrom.replace(/ \(Pickup: .*\)/, "")} (Pickup: ${pFlat})`;
+      }
+      if (dFlat && !finalTo.includes(`(Drop: ${dFlat})`)) {
+        finalTo = `${finalTo.replace(/ \(Drop: .*\)/, "")} (Drop: ${dFlat})`;
+      }
+
+      setFromAddress(finalFrom);
+      setToAddress(finalTo);
+
       // Intra-City shifting base pricing with minimum distance for same apartment move
       const dist = "1.00";
       setDistance(dist);
-      localStorage.setItem("fromAddress", fromAddress);
-      localStorage.setItem("toAddress", toAddress || fromAddress);
+      localStorage.setItem("fromAddress", finalFrom);
+      localStorage.setItem("toAddress", finalTo);
+      localStorage.setItem("pickupFlat", pFlat);
+      localStorage.setItem("dropFlat", dFlat);
       localStorage.setItem("shiftingDate", shiftingDate);
       localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
       localStorage.setItem("toCoords", JSON.stringify(toCoords || fromCoords));
@@ -320,6 +339,11 @@ const HomeSelection = ({ onLoginStatusChange }) => {
     localStorage.setItem("fromCoords", JSON.stringify(fromCoords));
     localStorage.setItem("toCoords", JSON.stringify(toCoords));
     localStorage.setItem("activeTab", activeTab);
+    localStorage.setItem("shiftingType", activeTab);
+    localStorage.removeItem("pickupFlat");
+    localStorage.removeItem("dropFlat");
+    localStorage.removeItem("pickupUnit");
+    localStorage.removeItem("destUnit");
     openModal();
   };
 

@@ -192,18 +192,72 @@ export const generateBookingConfirmationPDF = async (bookingData) => {
   const pickupFloorDisplay = formatFloor(pickupFloorRaw);
   const dropFloorDisplay = formatFloor(dropFloorRaw);
 
+  // Only display Pickup Flat / Tower and Drop Flat / Tower when shifting within the same apartment
+  const isSameApartment =
+    bookingData.shiftingType === "same_apartment" ||
+    bookingData.isSameApartment === true ||
+    bookingData.activeTab === "same_apartment" ||
+    (typeof localStorage !== "undefined" && (localStorage.getItem("shiftingType") === "same_apartment" || localStorage.getItem("activeTab") === "same_apartment"));
+
+  // Extract Pickup Flat / Tower and Drop Flat / Tower information (only if same_apartment)
+  const pickupFlat = isSameApartment
+    ? (bookingData.pickupFlat ||
+       bookingData.pickupUnit ||
+       bookingData.pickupFlatTower ||
+       (typeof localStorage !== "undefined" ? localStorage.getItem("pickupFlat") || localStorage.getItem("pickupUnit") : "") ||
+       (fromAddress ? fromAddress.match(/\(Pickup:\s*([^)]+)\)/i)?.[1] : "") ||
+       "")
+    : "";
+
+  const dropFlat = isSameApartment
+    ? (bookingData.dropFlat ||
+       bookingData.destUnit ||
+       bookingData.dropFlatTower ||
+       (typeof localStorage !== "undefined" ? localStorage.getItem("dropFlat") || localStorage.getItem("destUnit") : "") ||
+       (toAddress ? toAddress.match(/\(Drop:\s*([^)]+)\)/i)?.[1] : "") ||
+       "")
+    : "";
+
+  const pickupFlatDisplay = pickupFlat ? String(pickupFlat).trim() : "-";
+  const dropFlatDisplay = dropFlat ? String(dropFlat).trim() : "-";
+
+  let displayFromAddress = fromAddress || "______";
+  let displayToAddress = toAddress || "______";
+
+  if (isSameApartment) {
+    if (pickupFlat && !displayFromAddress.includes(pickupFlat)) {
+      displayFromAddress = `${displayFromAddress} (Pickup: ${pickupFlat})`;
+    }
+    if (dropFlat && !displayToAddress.includes(dropFlat)) {
+      displayToAddress = `${displayToAddress} (Drop: ${dropFlat})`;
+    }
+  } else {
+    displayFromAddress = displayFromAddress.replace(/ \(Pickup: .*\)/, "");
+    displayToAddress = displayToAddress.replace(/ \(Drop: .*\)/, "");
+  }
+
   /* =======================
      CUSTOMER INFORMATION TABLE
   ======================= */
+  const customerInfoTableBody = [
+    ["Quotation No:", quotationNumber || "-", "Pickup Date:", formatDate(shiftingDate) || "-"],
+    ["Customer Name:", customerName || "-", "Preferred Slot:", getTimeSlotName() || "-"],
+    ["Contact Phone:", customerPhone || "-", "Volume Estimate:", totalCFT ? `${totalCFT} CFT` : "-"],
+    ["Pickup Floor:", pickupFloorDisplay, "Drop Floor:", dropFloorDisplay],
+    ["Service Lift at Pickup:", formatLift(serviceLift), "Service Lift at Drop:", formatLift(serviceLiftdrop)],
+  ];
+
+  // Include Pickup and Drop Flat/Tower row in the customer specs table ONLY when same_apartment
+  if (isSameApartment && (pickupFlatDisplay !== "-" || dropFlatDisplay !== "-")) {
+    customerInfoTableBody.push([
+      "Pickup Flat / Tower:", pickupFlatDisplay,
+      "Drop Flat / Tower:", dropFlatDisplay
+    ]);
+  }
+
   autoTable(doc, {
     startY: y,
-    body: [
-      ["Quotation No:", quotationNumber || "-", "Pickup Date:", formatDate(shiftingDate) || "-"],
-      ["Customer Name:", customerName || "-", "Preferred Slot:", getTimeSlotName() || "-"],
-      ["Contact Phone:", customerPhone || "-", "Volume Estimate:", totalCFT ? `${totalCFT} CFT` : "-"],
-      ["Pickup Floor:", pickupFloorDisplay, "Drop Floor:", dropFloorDisplay],
-      ["Service Lift at Pickup:", formatLift(serviceLift), "Service Lift at Drop:", formatLift(serviceLiftdrop)],
-    ],
+    body: customerInfoTableBody,
     theme: "grid",
     styles: {
       fontSize: 9.5,
@@ -222,12 +276,23 @@ export const generateBookingConfirmationPDF = async (bookingData) => {
   });
   y = doc.lastAutoTable.finalY;
 
-  // Moving route row (full width)
+  // Moving route & Flat / Tower table (full width)
+  const routeTableBody = [
+    ["Moving Route:", `${displayFromAddress}  to  ${displayToAddress}`],
+  ];
+
+  if (isSameApartment && (pickupFlatDisplay !== "-" || dropFlatDisplay !== "-")) {
+    routeTableBody.push([
+      "Pickup Flat / Tower:", `${pickupFlatDisplay}`
+    ]);
+    routeTableBody.push([
+      "Drop Flat / Tower:", `${dropFlatDisplay}`
+    ]);
+  }
+
   autoTable(doc, {
     startY: y,
-    body: [
-      ["Moving Route:", `${fromAddress || "______"}  to  ${toAddress || "______"}`],
-    ],
+    body: routeTableBody,
     theme: "grid",
     styles: {
       fontSize: 9.5,

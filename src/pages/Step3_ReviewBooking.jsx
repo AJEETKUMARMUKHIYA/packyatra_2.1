@@ -79,6 +79,11 @@ const Step3_ReviewBooking = ({
   const [validationOpen, setValidationOpen] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
 
+  const isSameApartment =
+    bookingData.shiftingType === "same_apartment" ||
+    bookingData.isSameApartment === true ||
+    (typeof localStorage !== "undefined" && localStorage.getItem("shiftingType") === "same_apartment");
+
   // Calculate total CFT from selected items
   const totalCFT = bookingData.selectedItems.reduce(
     (sum, item) => sum + (item.quantity * (item.sizeCFT || 0)),
@@ -264,6 +269,9 @@ const Step3_ReviewBooking = ({
         shiftingDate,
         fromAddress,
         toAddress,
+        shiftingType: isSameApartment ? "same_apartment" : "within",
+        pickupFlat: isSameApartment ? (bookingData.pickupFlat || (typeof localStorage !== "undefined" ? localStorage.getItem("pickupFlat") : "")) : "",
+        dropFlat: isSameApartment ? (bookingData.dropFlat || (typeof localStorage !== "undefined" ? localStorage.getItem("dropFlat") : "")) : "",
         distance,
         serviceLift,
         serviceLiftdrop,
@@ -452,6 +460,11 @@ const Step3_ReviewBooking = ({
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {formatAddress(fromAddress)}
                       </Typography>
+                      {isSameApartment && (bookingData.pickupFlat || (typeof localStorage !== "undefined" && localStorage.getItem("pickupFlat"))) && (
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: "success.main", display: "inline-block", mt: 0.5 }}>
+                          Pickup Flat / Tower: {bookingData.pickupFlat || localStorage.getItem("pickupFlat")}
+                        </Typography>
+                      )}
                     </Box>
                   </Stack>
                 </Box>
@@ -470,6 +483,11 @@ const Step3_ReviewBooking = ({
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {formatAddress(toAddress)}
                       </Typography>
+                      {isSameApartment && (bookingData.dropFlat || (typeof localStorage !== "undefined" && localStorage.getItem("dropFlat"))) && (
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: "error.main", display: "inline-block", mt: 0.5 }}>
+                          Drop Flat / Tower: {bookingData.dropFlat || localStorage.getItem("dropFlat")}
+                        </Typography>
+                      )}
                     </Box>
                   </Stack>
                 </Box>

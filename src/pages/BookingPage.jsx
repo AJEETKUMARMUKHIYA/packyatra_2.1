@@ -42,9 +42,13 @@ const BookingPage = () => {
  // const priceCalculateTabwise = "within"; // Default value, can be changed based on your logic
   //const priceCalculateCitywise = "within"; // Default value, can be changed based on your logic
 
-    const shiftingDate = localStorage.getItem("shiftingDate");
-  const fromAddress = localStorage.getItem("fromAddress");
-  const toAddress = localStorage.getItem("toAddress");
+  const shiftingDate = location.state?.shiftingDate || localStorage.getItem("shiftingDate");
+  const fromAddress = location.state?.fromAddress || localStorage.getItem("fromAddress");
+  const toAddress = location.state?.toAddress || localStorage.getItem("toAddress");
+  const shiftingType = location.state?.shiftingType || localStorage.getItem("shiftingType") || "";
+  const isSameApartment = shiftingType === "same_apartment";
+  const pickupFlat = isSameApartment ? (location.state?.pickupFlat || localStorage.getItem("pickupFlat") || "") : "";
+  const dropFlat = isSameApartment ? (location.state?.dropFlat || localStorage.getItem("dropFlat") || "") : "";
   const userId = localStorage.getItem("userID");
   const addressId = localStorage.getItem("addressID");
   const mobile = localStorage.getItem("mobile");
@@ -80,6 +84,10 @@ const BookingPage = () => {
     paymentMethod: "UPI",
     fromAddress: fromAddress || "",
     toAddress: toAddress || "",
+    shiftingType: isSameApartment ? "same_apartment" : (shiftingType || "within"),
+    isSameApartment: isSameApartment,
+    pickupFlat: pickupFlat,
+    dropFlat: dropFlat,
     bookingId: null,
     transactionId: null,
     bookingConfirmed: false,

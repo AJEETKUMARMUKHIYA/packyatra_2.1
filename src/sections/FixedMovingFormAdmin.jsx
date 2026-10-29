@@ -57,6 +57,15 @@ const FixedMovingFormAdmin = ({
     setError("");
     setPickupUnit("");
     setDestUnit("");
+    if (activeTab !== "same_apartment") {
+      localStorage.removeItem("pickupFlat");
+      localStorage.removeItem("dropFlat");
+      localStorage.removeItem("pickupUnit");
+      localStorage.removeItem("destUnit");
+      localStorage.setItem("shiftingType", activeTab);
+    } else {
+      localStorage.setItem("shiftingType", "same_apartment");
+    }
   }, [activeTab]);
 
   const onFormSubmit = () => {
@@ -83,7 +92,23 @@ const FixedMovingFormAdmin = ({
       const fullTo = `${cleanBase} (Drop: ${destUnit.trim()})`;
       setFromAddress(fullFrom);
       setToAddress(fullTo);
+      localStorage.setItem("shiftingType", "same_apartment");
+      localStorage.setItem("pickupFlat", pickupUnit.trim());
+      localStorage.setItem("dropFlat", destUnit.trim());
+      localStorage.setItem("pickupUnit", pickupUnit.trim());
+      localStorage.setItem("destUnit", destUnit.trim());
+      localStorage.setItem("fromAddress", fullFrom);
+      localStorage.setItem("toAddress", fullTo);
+      handleCheckPricesAdmin(fullFrom, fullTo, pickupUnit.trim(), destUnit.trim());
+      return;
     }
+
+    localStorage.removeItem("pickupFlat");
+    localStorage.removeItem("dropFlat");
+    localStorage.removeItem("pickupUnit");
+    localStorage.removeItem("destUnit");
+    localStorage.setItem("shiftingType", activeTab);
+
     handleCheckPricesAdmin();
   };
 

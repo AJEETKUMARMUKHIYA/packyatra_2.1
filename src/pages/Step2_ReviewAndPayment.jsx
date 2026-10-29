@@ -82,6 +82,11 @@ const Step2_ReviewAndPayment = ({
   const tokenAmount = calculatedPrice * 0.1;
   const balanceAmount = calculatedPrice * 0.9;
 
+  const isSameApartment =
+    bookingData.shiftingType === "same_apartment" ||
+    bookingData.isSameApartment === true ||
+    (typeof localStorage !== "undefined" && localStorage.getItem("shiftingType") === "same_apartment");
+
   useEffect(() => {
     calculatePrice();
   }, [distance, totalCFT, bookingData.serviceLift, bookingData.selectedFloor, bookingData.serviceLiftdrop, bookingData.floordrop, bookingData.vanAccessible, bookingData.roadDistance, priceCalculateCitywise]);
@@ -327,6 +332,9 @@ const Step2_ReviewAndPayment = ({
         timeSlots,
         fromAddress,
         toAddress,
+        shiftingType: isSameApartment ? "same_apartment" : "within",
+        pickupFlat: isSameApartment ? (bookingData.pickupFlat || (typeof localStorage !== "undefined" ? localStorage.getItem("pickupFlat") : "")) : "",
+        dropFlat: isSameApartment ? (bookingData.dropFlat || (typeof localStorage !== "undefined" ? localStorage.getItem("dropFlat") : "")) : "",
         totalCFT,
         serviceLift: bookingData.serviceLift,
         serviceLiftdrop: bookingData.serviceLiftdrop,
@@ -412,6 +420,11 @@ const Step2_ReviewAndPayment = ({
                       <Typography variant="body1" fontWeight={500}>
                         {fromAddress || "Not set"}
                       </Typography>
+                      {isSameApartment && (bookingData.pickupFlat || (typeof localStorage !== "undefined" && localStorage.getItem("pickupFlat"))) && (
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: "primary.main", display: "inline-block", mt: 0.5, px: 1, py: 0.25, bgcolor: "primary.50", borderRadius: 1 }}>
+                          Pickup Flat / Tower: {bookingData.pickupFlat || localStorage.getItem("pickupFlat")}
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                 </Grid>
@@ -424,6 +437,11 @@ const Step2_ReviewAndPayment = ({
                       <Typography variant="body1" fontWeight={500}>
                         {toAddress || "Not set"}
                       </Typography>
+                      {isSameApartment && (bookingData.dropFlat || (typeof localStorage !== "undefined" && localStorage.getItem("dropFlat"))) && (
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: "success.main", display: "inline-block", mt: 0.5, px: 1, py: 0.25, bgcolor: "success.50", borderRadius: 1 }}>
+                          Drop Flat / Tower: {bookingData.dropFlat || localStorage.getItem("dropFlat")}
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                 </Grid>

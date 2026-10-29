@@ -12,6 +12,8 @@ const generateQuotationPDF = async (bookingData = {}, userData = {}, addressData
     floordrop: bookingData.floordrop ?? bookingData.dropFloor ?? addressData?.dropFloor ?? addressData?.floordrop,
     serviceLift: bookingData.serviceLift ?? addressData?.serviceLift,
     serviceLiftdrop: bookingData.serviceLiftdrop ?? addressData?.serviceLiftdrop,
+    pickupFlat: bookingData.pickupFlat || addressData?.pickupFlat || addressData?.pickupUnit || (typeof localStorage !== "undefined" ? localStorage.getItem("pickupFlat") || localStorage.getItem("pickupUnit") : ""),
+    dropFlat: bookingData.dropFlat || addressData?.dropFlat || addressData?.destUnit || (typeof localStorage !== "undefined" ? localStorage.getItem("dropFlat") || localStorage.getItem("destUnit") : ""),
   };
   return generateBookingConfirmationPDF(mergedData);
 };

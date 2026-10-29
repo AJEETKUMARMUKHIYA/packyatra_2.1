@@ -11,8 +11,22 @@ const ModalAdmin = ({ isOpen, closeModal, distance, activeTab, shiftingDate, fro
 
   const continueBooking = () => {
     closeModal();
+    const storedShiftingType = localStorage.getItem("shiftingType") || activeTab;
+    const isSameApartment = activeTab === "same_apartment" || storedShiftingType === "same_apartment";
+    const pickupFlat = isSameApartment ? (localStorage.getItem("pickupFlat") || "") : "";
+    const dropFlat = isSameApartment ? (localStorage.getItem("dropFlat") || "") : "";
     navigate(`/booking?distance=${distance}&activeTab=${activeTab}`, {
-      state: { distance, activeTab, shiftingDate, fromAddress, toAddress, selectedCity }
+      state: {
+        distance,
+        activeTab,
+        shiftingDate,
+        fromAddress,
+        toAddress,
+        selectedCity,
+        shiftingType: isSameApartment ? "same_apartment" : activeTab,
+        pickupFlat,
+        dropFlat
+      }
     });
   };
 
