@@ -81,8 +81,8 @@ const BookingPage = (selectedDate) => {
   const [inventory, setInventory] = useState([]);
   const [inventoryData, setInventoryData] = useState([]);
   const [searchParams] = useSearchParams();
-  const distance = searchParams.get("distance");
-  const priceCalculateCitywise = searchParams.get("activeTab");
+  const distance = searchParams.get("distance") || localStorage.getItem("distance") || "0";
+  const priceCalculateCitywise = searchParams.get("activeTab") || localStorage.getItem("activeTab") || "within";
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [totalCFT, setTotalCFT] = useState(0);

@@ -13,7 +13,8 @@ import PaymentSummary from "./pages/PaymentSummary.jsx";
 import PaymentGateway from "./pages/PaymentGateway.jsx";
 import PaymentCallback from "./pages/PaymentCallback.jsx";
 import Step5_Confirmation from "./pages/Step5_Confirmation.jsx";
-import  ScrollToTop from './components/ScrollToTop.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx';
+import UrlMasking from './components/UrlMasking.jsx';
 // Static pages
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
@@ -42,6 +43,7 @@ const App = () => {
   return (
     <Router>
       <ScrollToTop /> 
+      <UrlMasking />
       <div className="page-container">
         {/* Header always visible */}
         <Header onLoginStatusChange={handleLoginStatusChange} />

@@ -15,7 +15,9 @@ const ModalAdmin = ({ isOpen, closeModal, distance, activeTab, shiftingDate, fro
     const isSameApartment = activeTab === "same_apartment" || storedShiftingType === "same_apartment";
     const pickupFlat = isSameApartment ? (localStorage.getItem("pickupFlat") || "") : "";
     const dropFlat = isSameApartment ? (localStorage.getItem("dropFlat") || "") : "";
-    navigate(`/booking?distance=${distance}&activeTab=${activeTab}`, {
+    if (distance) localStorage.setItem("distance", String(distance));
+    if (activeTab) localStorage.setItem("activeTab", String(activeTab));
+    navigate("/booking", {
       state: {
         distance,
         activeTab,

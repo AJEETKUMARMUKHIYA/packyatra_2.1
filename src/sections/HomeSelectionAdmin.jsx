@@ -144,6 +144,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
 
       const dist = "1.00";
       setDistance(dist);
+      localStorage.setItem("distance", dist);
       localStorage.setItem("fromAddress", finalFrom);
       localStorage.setItem("toAddress", finalTo);
       localStorage.setItem("pickupFlat", pFlat);
@@ -177,7 +178,9 @@ const HomeSelection = ({ onLoginStatusChange }) => {
     setError("");
 
     const dist = calculateDistance(fromCoords, toCoords);
-    setDistance(dist.toFixed(2));
+    const formattedDist = dist.toFixed(2);
+    setDistance(formattedDist);
+    localStorage.setItem("distance", formattedDist);
     localStorage.setItem("fromAddress", fromAddress);
     localStorage.setItem("toAddress", toAddress);
     localStorage.setItem("shiftingDate", shiftingDate);

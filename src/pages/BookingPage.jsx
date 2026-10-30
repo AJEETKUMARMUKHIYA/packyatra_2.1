@@ -36,11 +36,37 @@ const BookingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
- const distance = searchParams.get("distance");
-  const priceCalculateCitywise = searchParams.get("activeTab");
- 
- // const priceCalculateTabwise = "within"; // Default value, can be changed based on your logic
-  //const priceCalculateCitywise = "within"; // Default value, can be changed based on your logic
+  const urlDistance = searchParams.get("distance");
+  const urlActiveTab = searchParams.get("activeTab");
+
+  const distance =
+    location.state?.distance ||
+    urlDistance ||
+    localStorage.getItem("distance") ||
+    "0";
+
+  const priceCalculateCitywise =
+    location.state?.activeTab ||
+    urlActiveTab ||
+    localStorage.getItem("activeTab") ||
+    "within";
+
+  useEffect(() => {
+    if (distance && distance !== "0") {
+      localStorage.setItem("distance", String(distance));
+    }
+    if (priceCalculateCitywise) {
+      localStorage.setItem("activeTab", String(priceCalculateCitywise));
+    }
+    // Mask URL in the browser address bar cleanly
+    if (location.search && location.search.length > 1) {
+      window.history.replaceState(
+        window.history.state,
+        document.title,
+        location.pathname
+      );
+    }
+  }, [distance, priceCalculateCitywise, location.search, location.pathname]);
 
   const shiftingDate = location.state?.shiftingDate || localStorage.getItem("shiftingDate");
   const fromAddress = location.state?.fromAddress || localStorage.getItem("fromAddress");
