@@ -1123,6 +1123,380 @@ const HomeSelection = ({ onLoginStatusChange }) => {
           </nav>
 
           {/* =========================================================
+              INTERACTIVE RELOCATION COST ESTIMATOR
+             ========================================================= */}
+          <section id="estimator" style={{ padding: "80px 24px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
+            <div className="container" style={{ maxWidth: "1280px", margin: "0 auto" }}>
+              
+              <div style={{ textAlign: "center", marginBottom: "48px" }}>
+                <div style={{
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  color: "#0045e6",
+                  marginBottom: "8px"
+                }}>
+                  Financial Planning & Estimator
+                </div>
+                <h2 style={{
+                  fontSize: "clamp(1.8rem, 3.2vw, 2.5rem)",
+                  fontWeight: "800",
+                  color: "#0f172a",
+                  marginBottom: "12px",
+                  letterSpacing: "-0.025em"
+                }}>
+                  Live Relocation Cost Calculator
+                </h2>
+                <p style={{
+                  fontSize: "15.5px",
+                  color: "#64748b",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                  lineHeight: "1.6"
+                }}>
+                  Accurate, itemized quotation generator. Adjust property size, distance, floor access, and packing grade to evaluate real-time costs.
+                </p>
+              </div>
+
+              {/* Two Column Estimator */}
+              <div className="reviews-two-col">
+                
+                {/* Left: Configuration Controls */}
+                <div style={{
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "16px",
+                  padding: "32px",
+                  boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.04)"
+                }}>
+                  <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", marginBottom: "22px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <FontAwesomeIcon icon={faCalculator} style={{ color: "#0045e6" }} />
+                    Configure Relocation Parameters
+                  </h3>
+
+                  {/* 1. BHK / Volume */}
+                  <div style={{ marginBottom: "22px" }}>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
+                      Volume / Configuration
+                    </label>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+                      {["1 BHK", "2 BHK", "3 BHK", "4 BHK / Villa"].map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setEstBhkSize(size)}
+                          style={{
+                            padding: "9px 4px",
+                            borderRadius: "8px",
+                            border: estBhkSize === size ? "2px solid #0045e6" : "1px solid #cbd5e1",
+                            background: estBhkSize === size ? "#eff6ff" : "#ffffff",
+                            color: estBhkSize === size ? "#0045e6" : "#334155",
+                            fontSize: "12.5px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            transition: "all 0.15s"
+                          }}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. Distance */}
+                  <div style={{ marginBottom: "22px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569" }}>
+                        Transit Distance
+                      </label>
+                      <span style={{ fontSize: "14px", fontWeight: "800", color: "#0045e6" }}>
+                        {estDistance} km
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="500"
+                      step="5"
+                      value={estDistance}
+                      onChange={(e) => setEstDistance(Number(e.target.value))}
+                      style={{
+                        width: "100%",
+                        height: "6px",
+                        borderRadius: "3px",
+                        accentColor: "#0045e6",
+                        background: "#e2e8f0",
+                        cursor: "pointer"
+                      }}
+                    />
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
+                      <span>Metropolitan (5 km)</span>
+                      <span>150 km</span>
+                      <span>300 km</span>
+                      <span>Inter-State (500 km+)</span>
+                    </div>
+                  </div>
+
+                  {/* 3. Floor Level */}
+                  <div style={{ marginBottom: "22px" }}>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
+                      Floor Level (Origin / Destination)
+                    </label>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      {[0, 1, 2, 3, 4, 5, 6].map((fl) => (
+                        <button
+                          key={fl}
+                          onClick={() => setEstFloor(fl)}
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            borderRadius: "8px",
+                            border: estFloor === fl ? "2px solid #0045e6" : "1px solid #cbd5e1",
+                            background: estFloor === fl ? "#eff6ff" : "#ffffff",
+                            color: estFloor === fl ? "#0045e6" : "#334155",
+                            fontSize: "13px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            transition: "all 0.15s"
+                          }}
+                        >
+                          {fl === 0 ? "G" : fl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 4. Service Lift Toggle */}
+                  {estFloor > 0 && (
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "12px 16px",
+                      background: "#f8fafc",
+                      borderRadius: "10px",
+                      border: "1px solid #e2e8f0",
+                      marginBottom: "22px"
+                    }}>
+                      <div>
+                        <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>Service Lift Available</div>
+                        <div style={{ fontSize: "11px", color: "#64748b" }}>Reduces manual staircase labor surcharge</div>
+                      </div>
+                      <button
+                        onClick={() => setEstHasLift(!estHasLift)}
+                        style={{
+                          width: "44px",
+                          height: "24px",
+                          borderRadius: "12px",
+                          background: estHasLift ? "#059669" : "#cbd5e1",
+                          border: "none",
+                          position: "relative",
+                          cursor: "pointer",
+                          transition: "background-color 0.2s"
+                        }}
+                      >
+                        <span style={{
+                          position: "absolute",
+                          top: "2px",
+                          left: estHasLift ? "22px" : "2px",
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "50%",
+                          background: "#ffffff",
+                          transition: "left 0.2s"
+                        }} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 5. Packaging Quality */}
+                  <div style={{ marginBottom: "22px" }}>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
+                      Industrial Packaging Grade
+                    </label>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
+                      {[
+                        { name: "Economy", desc: "Basic carton pack" },
+                        { name: "Standard", desc: "Corrugated layers" },
+                        { name: "Premium", desc: "Triple bubble wrap" }
+                      ].map((type) => (
+                        <button
+                          key={type.name}
+                          onClick={() => setEstPackingType(type.name)}
+                          style={{
+                            padding: "10px 6px",
+                            borderRadius: "8px",
+                            border: estPackingType === type.name ? "2px solid #0045e6" : "1px solid #cbd5e1",
+                            background: estPackingType === type.name ? "#eff6ff" : "#ffffff",
+                            color: estPackingType === type.name ? "#0045e6" : "#334155",
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            textAlign: "center"
+                          }}
+                        >
+                          <div style={{ fontSize: "12.5px", fontWeight: "700" }}>{type.name}</div>
+                          <div style={{ fontSize: "10px", color: "#64748b", marginTop: "2px" }}>{type.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 6. Transit Insurance Policy */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 16px",
+                    background: estIncludeInsurance ? "#f0fdf4" : "#f8fafc",
+                    borderRadius: "10px",
+                    border: estIncludeInsurance ? "1px solid #bbf7d0" : "1px solid #e2e8f0"
+                  }}>
+                    <div>
+                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <FontAwesomeIcon icon={faShieldAlt} style={{ color: "#059669" }} />
+                        Transit Risk & Damage Indemnity Policy
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#64748b" }}>Flat coverage premium covers goods up to ₹50,000</div>
+                    </div>
+                    <button
+                      onClick={() => setEstIncludeInsurance(!estIncludeInsurance)}
+                      style={{
+                        width: "44px",
+                        height: "24px",
+                        borderRadius: "12px",
+                        background: estIncludeInsurance ? "#059669" : "#cbd5e1",
+                        border: "none",
+                        position: "relative",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s"
+                      }}
+                    >
+                      <span style={{
+                        position: "absolute",
+                        top: "2px",
+                        left: estIncludeInsurance ? "22px" : "2px",
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        background: "#ffffff",
+                        transition: "left 0.2s"
+                      }} />
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Right: Itemized Quotation Slip */}
+                <div style={{
+                  background: "#090e1a",
+                  borderRadius: "16px",
+                  padding: "36px 30px",
+                  color: "#ffffff",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  border: "1px solid #1e293b",
+                  boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.5)"
+                }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", background: "rgba(255,255,255,0.08)", padding: "4px 10px", borderRadius: "6px", color: "#94a3b8" }}>
+                        Commercial Quotation Slip
+                      </span>
+                      <span style={{ fontSize: "11.5px", color: "#38bdf8", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <FontAwesomeIcon icon={faLock} /> Verified SLA Rates
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "16px" }}>
+                      Itemized Relocation Breakdown for {estBhkSize}:
+                    </p>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "14px", borderBottom: "1px dashed rgba(255,255,255,0.15)", paddingBottom: "20px", marginBottom: "20px" }}>
+                      
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                        <span style={{ color: "#94a3b8" }}>Fleet Base + Distance ({estDistance} km):</span>
+                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.transport.toLocaleString()}</span>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                        <span style={{ color: "#94a3b8" }}>Packaging & Labor ({estPackingType}):</span>
+                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.packing.toLocaleString()}</span>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                        <span style={{ color: "#94a3b8" }}>Floor Handling (Floor {estFloor}{estFloor > 0 && (estHasLift ? " w/ lift" : " stairs")}):</span>
+                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.floorSurcharge.toLocaleString()}</span>
+                      </div>
+
+                      {estIncludeInsurance && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                          <span style={{ color: "#94a3b8" }}>Transit Risk Indemnity (₹50k coverage):</span>
+                          <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.insurance.toLocaleString()}</span>
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                        <span style={{ color: "#94a3b8" }}>Integrated GST Surcharge (18%):</span>
+                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.gst.toLocaleString()}</span>
+                      </div>
+
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: "#94a3b8" }}>Estimated Total:</span>
+                      <div style={{ fontSize: "32px", fontWeight: "900", color: "#38bdf8", fontFamily: "monospace" }}>
+                        ₹{estBreakdown.total.toLocaleString()}*
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
+                      *Excludes state border tolls or commercial crane charges if required.
+                    </div>
+                  </div>
+
+                  {/* Primary Action Button in #0045e6 */}
+                  <div style={{ marginTop: "32px" }}>
+                    <button
+                      onClick={() => {
+                        const heroElement = document.getElementById("home") || document.querySelector(".fixed-form");
+                        if (heroElement) heroElement.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "#0045e6",
+                        color: "#ffffff",
+                        padding: "14px 20px",
+                        borderRadius: "8px",
+                        fontSize: "14.5px",
+                        fontWeight: "700",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        boxShadow: "0 4px 16px rgba(0, 69, 230, 0.4)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "#0033aa"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "#0045e6"}
+                    >
+                      <FontAwesomeIcon icon={faTruckMoving} />
+                      Proceed to Lock Special Price
+                    </button>
+                    <p style={{ textAlign: "center", fontSize: "11px", color: "#64748b", marginTop: "10px" }}>
+                      Locks rate for 14 days with zero upfront commitment. Full cancellation support.
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* =========================================================
               WHY CHOOSE PACKYATRA - BENTO GRID GUARANTEES & PERKS
              ========================================================= */}
           <WhyChoosePackYatra />
@@ -1793,379 +2167,7 @@ const HomeSelection = ({ onLoginStatusChange }) => {
             </div>
           </section>
 
-          {/* =========================================================
-              INTERACTIVE RELOCATION COST ESTIMATOR
-             ========================================================= */}
-          <section id="estimator" style={{ padding: "80px 24px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
-            <div className="container" style={{ maxWidth: "1280px", margin: "0 auto" }}>
-              
-              <div style={{ textAlign: "center", marginBottom: "48px" }}>
-                <div style={{
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  color: "#0045e6",
-                  marginBottom: "8px"
-                }}>
-                  Financial Planning & Estimator
-                </div>
-                <h2 style={{
-                  fontSize: "clamp(1.8rem, 3.2vw, 2.5rem)",
-                  fontWeight: "800",
-                  color: "#0f172a",
-                  marginBottom: "12px",
-                  letterSpacing: "-0.025em"
-                }}>
-                  Live Relocation Cost Calculator
-                </h2>
-                <p style={{
-                  fontSize: "15.5px",
-                  color: "#64748b",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                  lineHeight: "1.6"
-                }}>
-                  Accurate, itemized quotation generator. Adjust property size, distance, floor access, and packing grade to evaluate real-time costs.
-                </p>
-              </div>
 
-              {/* Two Column Estimator */}
-              <div className="reviews-two-col">
-                
-                {/* Left: Configuration Controls */}
-                <div style={{
-                  background: "#ffffff",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "16px",
-                  padding: "32px",
-                  boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.04)"
-                }}>
-                  <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", marginBottom: "22px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <FontAwesomeIcon icon={faCalculator} style={{ color: "#0045e6" }} />
-                    Configure Relocation Parameters
-                  </h3>
-
-                  {/* 1. BHK / Volume */}
-                  <div style={{ marginBottom: "22px" }}>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
-                      Volume / Configuration
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
-                      {["1 BHK", "2 BHK", "3 BHK", "4 BHK / Villa"].map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setEstBhkSize(size)}
-                          style={{
-                            padding: "9px 4px",
-                            borderRadius: "8px",
-                            border: estBhkSize === size ? "2px solid #0045e6" : "1px solid #cbd5e1",
-                            background: estBhkSize === size ? "#eff6ff" : "#ffffff",
-                            color: estBhkSize === size ? "#0045e6" : "#334155",
-                            fontSize: "12.5px",
-                            fontWeight: "700",
-                            cursor: "pointer",
-                            transition: "all 0.15s"
-                          }}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 2. Distance */}
-                  <div style={{ marginBottom: "22px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                      <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569" }}>
-                        Transit Distance
-                      </label>
-                      <span style={{ fontSize: "14px", fontWeight: "800", color: "#0045e6" }}>
-                        {estDistance} km
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="500"
-                      step="5"
-                      value={estDistance}
-                      onChange={(e) => setEstDistance(Number(e.target.value))}
-                      style={{
-                        width: "100%",
-                        height: "6px",
-                        borderRadius: "3px",
-                        accentColor: "#0045e6",
-                        background: "#e2e8f0",
-                        cursor: "pointer"
-                      }}
-                    />
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
-                      <span>Metropolitan (5 km)</span>
-                      <span>150 km</span>
-                      <span>300 km</span>
-                      <span>Inter-State (500 km+)</span>
-                    </div>
-                  </div>
-
-                  {/* 3. Floor Level */}
-                  <div style={{ marginBottom: "22px" }}>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
-                      Floor Level (Origin / Destination)
-                    </label>
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                      {[0, 1, 2, 3, 4, 5, 6].map((fl) => (
-                        <button
-                          key={fl}
-                          onClick={() => setEstFloor(fl)}
-                          style={{
-                            width: "38px",
-                            height: "38px",
-                            borderRadius: "8px",
-                            border: estFloor === fl ? "2px solid #0045e6" : "1px solid #cbd5e1",
-                            background: estFloor === fl ? "#eff6ff" : "#ffffff",
-                            color: estFloor === fl ? "#0045e6" : "#334155",
-                            fontSize: "13px",
-                            fontWeight: "700",
-                            cursor: "pointer",
-                            transition: "all 0.15s"
-                          }}
-                        >
-                          {fl === 0 ? "G" : fl}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 4. Service Lift Toggle */}
-                  {estFloor > 0 && (
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 16px",
-                      background: "#f8fafc",
-                      borderRadius: "10px",
-                      border: "1px solid #e2e8f0",
-                      marginBottom: "22px"
-                    }}>
-                      <div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>Service Lift Available</div>
-                        <div style={{ fontSize: "11px", color: "#64748b" }}>Reduces manual staircase labor surcharge</div>
-                      </div>
-                      <button
-                        onClick={() => setEstHasLift(!estHasLift)}
-                        style={{
-                          width: "44px",
-                          height: "24px",
-                          borderRadius: "12px",
-                          background: estHasLift ? "#059669" : "#cbd5e1",
-                          border: "none",
-                          position: "relative",
-                          cursor: "pointer",
-                          transition: "background-color 0.2s"
-                        }}
-                      >
-                        <span style={{
-                          position: "absolute",
-                          top: "2px",
-                          left: estHasLift ? "22px" : "2px",
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
-                          background: "#ffffff",
-                          transition: "left 0.2s"
-                        }} />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 5. Packaging Quality */}
-                  <div style={{ marginBottom: "22px" }}>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", color: "#475569", marginBottom: "8px" }}>
-                      Industrial Packaging Grade
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
-                      {[
-                        { name: "Economy", desc: "Basic carton pack" },
-                        { name: "Standard", desc: "Corrugated layers" },
-                        { name: "Premium", desc: "Triple bubble wrap" }
-                      ].map((type) => (
-                        <button
-                          key={type.name}
-                          onClick={() => setEstPackingType(type.name)}
-                          style={{
-                            padding: "10px 6px",
-                            borderRadius: "8px",
-                            border: estPackingType === type.name ? "2px solid #0045e6" : "1px solid #cbd5e1",
-                            background: estPackingType === type.name ? "#eff6ff" : "#ffffff",
-                            color: estPackingType === type.name ? "#0045e6" : "#334155",
-                            cursor: "pointer",
-                            transition: "all 0.15s",
-                            textAlign: "center"
-                          }}
-                        >
-                          <div style={{ fontSize: "12.5px", fontWeight: "700" }}>{type.name}</div>
-                          <div style={{ fontSize: "10px", color: "#64748b", marginTop: "2px" }}>{type.desc}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 6. Transit Insurance Policy */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "12px 16px",
-                    background: estIncludeInsurance ? "#f0fdf4" : "#f8fafc",
-                    borderRadius: "10px",
-                    border: estIncludeInsurance ? "1px solid #bbf7d0" : "1px solid #e2e8f0"
-                  }}>
-                    <div>
-                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                        <FontAwesomeIcon icon={faShieldAlt} style={{ color: "#059669" }} />
-                        Transit Risk & Damage Indemnity Policy
-                      </div>
-                      <div style={{ fontSize: "11px", color: "#64748b" }}>Flat coverage premium covers goods up to ₹50,000</div>
-                    </div>
-                    <button
-                      onClick={() => setEstIncludeInsurance(!estIncludeInsurance)}
-                      style={{
-                        width: "44px",
-                        height: "24px",
-                        borderRadius: "12px",
-                        background: estIncludeInsurance ? "#059669" : "#cbd5e1",
-                        border: "none",
-                        position: "relative",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s"
-                      }}
-                    >
-                      <span style={{
-                        position: "absolute",
-                        top: "2px",
-                        left: estIncludeInsurance ? "22px" : "2px",
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "50%",
-                        background: "#ffffff",
-                        transition: "left 0.2s"
-                      }} />
-                    </button>
-                  </div>
-
-                </div>
-
-                {/* Right: Itemized Quotation Slip */}
-                <div style={{
-                  background: "#090e1a",
-                  borderRadius: "16px",
-                  padding: "36px 30px",
-                  color: "#ffffff",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  border: "1px solid #1e293b",
-                  boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.5)"
-                }}>
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                      <span style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", background: "rgba(255,255,255,0.08)", padding: "4px 10px", borderRadius: "6px", color: "#94a3b8" }}>
-                        Commercial Quotation Slip
-                      </span>
-                      <span style={{ fontSize: "11.5px", color: "#38bdf8", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
-                        <FontAwesomeIcon icon={faLock} /> Verified SLA Rates
-                      </span>
-                    </div>
-
-                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "16px" }}>
-                      Itemized Relocation Breakdown for {estBhkSize}:
-                    </p>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "14px", borderBottom: "1px dashed rgba(255,255,255,0.15)", paddingBottom: "20px", marginBottom: "20px" }}>
-                      
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                        <span style={{ color: "#94a3b8" }}>Fleet Base + Distance ({estDistance} km):</span>
-                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.transport.toLocaleString()}</span>
-                      </div>
-
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                        <span style={{ color: "#94a3b8" }}>Packaging & Labor ({estPackingType}):</span>
-                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.packing.toLocaleString()}</span>
-                      </div>
-
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                        <span style={{ color: "#94a3b8" }}>Floor Handling (Floor {estFloor}{estFloor > 0 && (estHasLift ? " w/ lift" : " stairs")}):</span>
-                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.floorSurcharge.toLocaleString()}</span>
-                      </div>
-
-                      {estIncludeInsurance && (
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                          <span style={{ color: "#94a3b8" }}>Transit Risk Indemnity (₹50k coverage):</span>
-                          <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.insurance.toLocaleString()}</span>
-                        </div>
-                      )}
-
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                        <span style={{ color: "#94a3b8" }}>Integrated GST Surcharge (18%):</span>
-                        <span style={{ fontWeight: "700", fontFamily: "monospace" }}>₹{estBreakdown.gst.toLocaleString()}</span>
-                      </div>
-
-                    </div>
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "15px", fontWeight: "700", color: "#94a3b8" }}>Estimated Total:</span>
-                      <div style={{ fontSize: "32px", fontWeight: "900", color: "#38bdf8", fontFamily: "monospace" }}>
-                        ₹{estBreakdown.total.toLocaleString()}*
-                      </div>
-                    </div>
-                    <div style={{ fontSize: "10.5px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
-                      *Excludes state border tolls or commercial crane charges if required.
-                    </div>
-                  </div>
-
-                  {/* Primary Action Button in #0045e6 */}
-                  <div style={{ marginTop: "32px" }}>
-                    <button
-                      onClick={() => {
-                        const heroElement = document.getElementById("home") || document.querySelector(".fixed-form");
-                        if (heroElement) heroElement.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      style={{
-                        width: "100%",
-                        background: "#0045e6",
-                        color: "#ffffff",
-                        padding: "14px 20px",
-                        borderRadius: "8px",
-                        fontSize: "14.5px",
-                        fontWeight: "700",
-                        border: "none",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        boxShadow: "0 4px 16px rgba(0, 69, 230, 0.4)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px"
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = "#0033aa"}
-                      onMouseLeave={(e) => e.currentTarget.style.background = "#0045e6"}
-                    >
-                      <FontAwesomeIcon icon={faTruckMoving} />
-                      Proceed to Lock Special Price
-                    </button>
-                    <p style={{ textAlign: "center", fontSize: "11px", color: "#64748b", marginTop: "10px" }}>
-                      Locks rate for 14 days with zero upfront commitment. Full cancellation support.
-                    </p>
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-          </section>
 
           {/* =========================================================
               INTERACTIVE PERSONAL & CORPORATE MOVING CHECKLIST PLANNER
