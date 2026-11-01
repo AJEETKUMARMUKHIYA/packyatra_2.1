@@ -1,30 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Grid,
   Typography,
   Button,
-  ToggleButton,
-  ToggleButtonGroup,
   TextField,
   Box,
   Stack,
   Paper,
   Fade,
-  List,
-  ListItemButton,
-  ListItemText,
   Divider,
   Avatar,
-  Chip
+  Chip,
+  Tooltip,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import {
   Elevator,
   AccessTime,
   LocationOn,
-  DirectionsCar,
   CheckCircle,
-  Cancel,
-  ApartmentOutlined
+  ApartmentOutlined,
+  LocalShippingOutlined,
+  DirectionsWalk,
+  StairsOutlined,
+  ArrowForward,
+  ArrowBack,
+  InfoOutlined,
+  WbSunnyOutlined,
+  NightsStayOutlined,
+  Check
 } from "@mui/icons-material";
 
 const Step2_ServiceOptions = ({
@@ -33,7 +40,8 @@ const Step2_ServiceOptions = ({
   onNext,
   onBack,
   distance,
-  timeSlots
+  timeSlots = [],
+  loading = false
 }) => {
   const {
     serviceLift,
@@ -45,51 +53,42 @@ const Step2_ServiceOptions = ({
     roadDetails,
     selectedTimeSlot,
     fromAddress,
-    toAddress
+    toAddress,
+    isSameApartment,
+    pickupFlat,
+    dropFlat
   } = bookingData;
+
+  const [customFloorMode, setCustomFloorMode] = useState(false);
 
   /* ======================
      PRICE CONFIG
   ====================== */
   const FLOOR_PRICE = 200;
-
   const LIFT_NOT_AVAILABLE_PRICE = 500;
 
   /* ======================
      PRICE CALCULATION
   ====================== */
-
-  const calculateExtraCharge = (distance) => {
-    if (!distance) return 0;
-    return (distance / 50) * 200;
+  const calculateExtraCharge = (dist) => {
+    if (!dist) return 0;
+    if (typeof dist === "number") return (dist / 50) * 200;
+    const match = String(dist).match(/(\d+)\s*m?$/);
+    const num = match ? parseInt(match[1], 10) : parseInt(dist, 10);
+    if (isNaN(num)) return 0;
+    return (num / 50) * 200;
   };
 
-  const handlePickupLiftChange = (e, value) => {
-    if (value !== null) {
-      onUpdate({
-        serviceLift: value,
-        //  selectedFloor: value === "yes" ? null : selectedFloor
-      });
-    }
-  };
-
-  const handleDropLiftChange = (e, value) => {
-    if (value !== null) {
-      onUpdate({
-        serviceLiftdrop: value,
-        //  floordrop: value === "yes" ? null : floordrop
-      });
-    }
-  };
-
-  // Calculate total CFT
-  const totalCFT = bookingData.selectedItems.reduce(
+  // Calculate total CFT from selected items
+  const totalCFT = (bookingData.selectedItems || []).reduce(
     (sum, item) => sum + item.quantity * (item.sizeCFT || 0),
     0
   );
 
-  // Function to get floor charge when lift NOT available
-  function getFloorCharge(totalCFT, floor) {
+  // Floor charge when lift NOT available
+  function getFloorCharge(cft, floor) {
+    if (!floor || floor <= 0) return 0;
+
     const priceTable = {
       2: { small: 1500, medium: 2000, large: 3000 },
       3: { small: 2500, medium: 3500, large: 4000 },
@@ -97,14 +96,13 @@ const Step2_ServiceOptions = ({
       5: { small: 4000, medium: 5000, large: 5500 }
     };
 
-    let slab;
-
-    if (totalCFT <= 300) slab = "small";
-    else if (totalCFT <= 800) slab = "medium";
+    let slab = "small";
+    if (cft <= 300) slab = "small";
+    else if (cft <= 800) slab = "medium";
     else slab = "large";
 
     if (floor >= 2 && floor <= 5) {
-      return priceTable[floor][slab];
+      return priceTable[floor]?.[slab] || 0;
     }
 
     if (floor > 5) {
@@ -116,20 +114,12 @@ const Step2_ServiceOptions = ({
     return 0;
   }
 
-  /* -------------------------
-     Pickup Floor Charge
-  -------------------------- */
-
   const pickupFloorCharge =
     serviceLift === "yes"
       ? selectedFloor
         ? selectedFloor * FLOOR_PRICE
         : 0
       : getFloorCharge(totalCFT, selectedFloor);
-
-  /* -------------------------
-     Drop Floor Charge
-  -------------------------- */
 
   const dropFloorCharge =
     serviceLiftdrop === "yes"
@@ -138,33 +128,38 @@ const Step2_ServiceOptions = ({
         : 0
       : getFloorCharge(totalCFT, floordrop);
 
-  // const pickupFloorCharge =
-  //   selectedFloor ? selectedFloor * FLOOR_PRICE : 0;
-
-  // const dropFloorCharge =
-  //   floordrop ? floordrop * FLOOR_PRICE : 0;
-
   const pickupLiftCharge = serviceLift === "no" ? LIFT_NOT_AVAILABLE_PRICE : 0;
-
   const dropLiftCharge = serviceLiftdrop === "no" ? LIFT_NOT_AVAILABLE_PRICE : 0;
-
   const VanAccessCharge =
     vanAccessible === "no" ? calculateExtraCharge(roadDistance) : 0;
 
   const totalExtraCharge =
-    pickupFloorCharge + dropFloorCharge + pickupLiftCharge + dropLiftCharge + VanAccessCharge;
+    pickupFloorCharge +
+    dropFloorCharge +
+    pickupLiftCharge +
+    dropLiftCharge +
+    VanAccessCharge;
 
   /* ======================
-     HANDLERS (RESTORED LOGIC)
+     HANDLERS
   ====================== */
+  const handlePickupLiftChange = (value) => {
+    if (value !== null) {
+      onUpdate({ serviceLift: value });
+    }
+  };
 
-  const handlePickupFloorSelect = (floor) => onUpdate({ selectedFloor: floor });
+  const handleDropLiftChange = (value) => {
+    if (value !== null) {
+      onUpdate({ serviceLiftdrop: value });
+    }
+  };
 
-  const handleDropFloorSelect = (floor) => onUpdate({ floordrop: floor });
-
+  const handlePickupFloorSelect = (floor) => onUpdate({ selectedFloor: Number(floor) });
+  const handleDropFloorSelect = (floor) => onUpdate({ floordrop: Number(floor) });
   const handleTimeSlotChange = (id) => onUpdate({ selectedTimeSlot: id });
 
-  const handleVanAccessChange = (e, value) => {
+  const handleVanAccessChange = (value) => {
     if (value !== null) {
       onUpdate({ vanAccessible: value });
       if (value === "yes") {
@@ -174,345 +169,834 @@ const Step2_ServiceOptions = ({
   };
 
   const handleRoadDistanceSelect = (dist) => onUpdate({ roadDistance: dist });
-
   const handleRoadDetailsChange = (e) => onUpdate({ roadDetails: e.target.value });
 
   const isNextDisabled = !selectedTimeSlot || !vanAccessible;
 
-  const toggleStyle = {
-    py: 1.3,
-    borderRadius: 2,
-    textTransform: "none",
-    fontWeight: 600,
-    fontSize: "13.5px",
-    border: "1.5px solid",
-    borderColor: "grey.200",
-    color: "text.secondary",
-    "&.Mui-selected": {
-      background: "linear-gradient(135deg, #4f46e5, #6366f1)",
-      color: "#fff",
-      borderColor: "transparent",
-      boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)"
-    },
-    "&.Mui-selected:hover": {
-      background: "linear-gradient(135deg, #4338ca, #4f46e5)"
-    }
-  };
+  // Selected time slot object & display name
+  const selectedSlotObj = (timeSlots || []).find((s) => s.timeSlotID === selectedTimeSlot);
+  const selectedTimeSlotLabel = selectedSlotObj?.timeSlotName?.replace(/\./g, ":") || "Not selected";
 
-  const parseTime = (label) => {
-    const [hour, period] = label.split(" ");
-    return { hour, period };
-  };
-
-  const floorListItemStyle = {
-    borderRadius: 1.5,
-    mx: 0.75,
-    my: 0.3,
-    "&.Mui-selected": {
-      background: "linear-gradient(135deg, #4f46e5, #6366f1)",
-      color: "white"
-    },
-    "&.Mui-selected:hover": {
-      background: "linear-gradient(135deg, #4338ca, #4f46e5)"
-    }
-  };
-
-  /* ======================
-     UI
-  ====================== */
+  // Common quick floors list (0 = Ground, 1 = 1st, etc.)
+  const quickFloors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <Grid container spacing={2.5}>
-      {/* LEFT SECTION */}
+    <Grid container spacing={3}>
+      {/* LEFT COLUMN: SERVICE SELECTIONS */}
       <Grid item xs={12} lg={8}>
-        <Stack spacing={2.5}>
-          {/* TIME SLOT */}
+        <Stack spacing={3}>
+          {/* SECTION 1: PICKUP TIME SLOT */}
           <Paper
             elevation={0}
-            sx={{ p: 2.75, borderRadius: 3, border: "1px solid", borderColor: "grey.200" }}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: 3.5,
+              border: "1.5px solid",
+              borderColor: "grey.200",
+              bgcolor: "white",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.04)"
+            }}
           >
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2 }}>
-              <Avatar sx={{ bgcolor: "primary.50", color: "primary.main", width: 36, height: 36 }}>
-                <AccessTime fontSize="small" />
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Avatar
+                  sx={{
+                    background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",
+                    color: "white",
+                    width: 40,
+                    height: 40,
+                    boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)"
+                  }}
+                >
+                  <AccessTime fontSize="small" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={800} fontSize="17px" color="text.primary">
+                    Select Pickup Time Slot
+                  </Typography>
+                  <Typography fontSize="12.5px" color="text.secondary">
+                    Choose an arrival window for our moving & packing crew
+                  </Typography>
+                </Box>
+              </Stack>
+
+              {selectedTimeSlot && (
+                <Chip
+                  icon={<Check sx={{ fontSize: 14 }} />}
+                  label={selectedTimeSlotLabel}
+                  size="small"
+                  sx={{
+                    bgcolor: "rgba(79, 70, 229, 0.1)",
+                    color: "primary.main",
+                    fontWeight: 700,
+                    fontSize: "12px",
+                    "& .MuiChip-icon": { color: "primary.main" }
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Morning Slots */}
+            <Box sx={{ mb: 2.5 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                <WbSunnyOutlined sx={{ fontSize: 18, color: "#f59e0b" }} />
+                <Typography fontWeight={700} fontSize="13.5px" color="text.primary">
+                  Morning Slots
+                </Typography>
+                <Typography fontSize="12px" color="text.secondary">
+                  (8:00 AM – 11:30 AM)
+                </Typography>
+              </Stack>
+
+              <Grid container spacing={1.5}>
+                {timeSlots
+                  ?.filter((slot) => slot.timeSlotName.includes("AM"))
+                  .map((slot) => {
+                    const isSelected = selectedTimeSlot === slot.timeSlotID;
+                    const cleanLabel = slot.timeSlotName.replace(/\./g, ":");
+
+                    return (
+                      <Grid item xs={6} sm={3} key={slot.timeSlotID}>
+                        <Paper
+                          onClick={() => handleTimeSlotChange(slot.timeSlotID)}
+                          elevation={0}
+                          sx={{
+                            p: 1.6,
+                            borderRadius: 2.5,
+                            cursor: "pointer",
+                            textAlign: "center",
+                            border: "1.5px solid",
+                            borderColor: isSelected ? "primary.main" : "grey.200",
+                            bgcolor: isSelected ? "rgba(79, 70, 229, 0.05)" : "white",
+                            boxShadow: isSelected
+                              ? "0 4px 14px rgba(79, 70, 229, 0.2)"
+                              : "0 1px 3px rgba(0,0,0,0.02)",
+                            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                            "&:hover": {
+                              borderColor: "primary.main",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(79, 70, 229, 0.15)"
+                            }
+                          }}
+                        >
+                          <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.6}>
+                            <AccessTime sx={{ fontSize: 16, color: isSelected ? "primary.main" : "text.secondary" }} />
+                            <Typography
+                              fontWeight={800}
+                              fontSize="13.5px"
+                              color={isSelected ? "primary.main" : "text.primary"}
+                              sx={{ fontVariantNumeric: "tabular-nums" }}
+                            >
+                              {cleanLabel}
+                            </Typography>
+                          </Stack>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
+              </Grid>
+            </Box>
+
+            {/* Afternoon Slots */}
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                <NightsStayOutlined sx={{ fontSize: 18, color: "#6366f1" }} />
+                <Typography fontWeight={700} fontSize="13.5px" color="text.primary">
+                  Afternoon & Evening Slots
+                </Typography>
+                <Typography fontSize="12px" color="text.secondary">
+                  (12:00 PM – 5:30 PM)
+                </Typography>
+              </Stack>
+
+              <Grid container spacing={1.5}>
+                {timeSlots
+                  ?.filter((slot) => slot.timeSlotName.includes("PM"))
+                  .map((slot) => {
+                    const isSelected = selectedTimeSlot === slot.timeSlotID;
+                    const cleanLabel = slot.timeSlotName.replace(/\./g, ":");
+
+                    return (
+                      <Grid item xs={6} sm={3} key={slot.timeSlotID}>
+                        <Paper
+                          onClick={() => handleTimeSlotChange(slot.timeSlotID)}
+                          elevation={0}
+                          sx={{
+                            p: 1.6,
+                            borderRadius: 2.5,
+                            cursor: "pointer",
+                            textAlign: "center",
+                            border: "1.5px solid",
+                            borderColor: isSelected ? "primary.main" : "grey.200",
+                            bgcolor: isSelected ? "rgba(79, 70, 229, 0.05)" : "white",
+                            boxShadow: isSelected
+                              ? "0 4px 14px rgba(79, 70, 229, 0.2)"
+                              : "0 1px 3px rgba(0,0,0,0.02)",
+                            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                            "&:hover": {
+                              borderColor: "primary.main",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(79, 70, 229, 0.15)"
+                            }
+                          }}
+                        >
+                          <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.6}>
+                            <AccessTime sx={{ fontSize: 16, color: isSelected ? "primary.main" : "text.secondary" }} />
+                            <Typography
+                              fontWeight={800}
+                              fontSize="13.5px"
+                              color={isSelected ? "primary.main" : "text.primary"}
+                              sx={{ fontVariantNumeric: "tabular-nums" }}
+                            >
+                              {cleanLabel}
+                            </Typography>
+                          </Stack>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
+              </Grid>
+            </Box>
+          </Paper>
+
+          {/* SECTION 2: PICKUP ORIGIN LOCATION & ELEVATOR */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: 3.5,
+              border: "1.5px solid",
+              borderColor: "grey.200",
+              bgcolor: "white",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.04)"
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(22, 163, 74, 0.12)",
+                  color: "#16a34a",
+                  width: 40,
+                  height: 40,
+                  fontWeight: 800
+                }}
+              >
+                <LocationOn fontSize="small" />
               </Avatar>
-              <Typography variant="h6" fontWeight={700} fontSize="16.5px">
-                Select pickup time slot
-              </Typography>
+              <Box>
+                <Typography variant="h6" fontWeight={800} fontSize="17px" color="text.primary">
+                  Pickup Location & Access
+                </Typography>
+                <Typography fontSize="12.5px" color="text.secondary">
+                  Specify elevator availability and floor height at origin
+                </Typography>
+              </Box>
             </Stack>
 
-            {["AM", "PM"].map((period) => (
-              <Box key={period} sx={{ mb: 2 }}>
-                <Typography sx={{ fontWeight: 700, mb: 1, fontSize: "13.5px", color: "text.secondary" }}>
-                  {period === "AM" ? "☀️ Morning" : "🌤 Afternoon"}
+            {/* Address Info Chip */}
+            <Box
+              sx={{
+                p: 1.5,
+                mb: 2.5,
+                borderRadius: 2.5,
+                bgcolor: "grey.50",
+                border: "1px solid",
+                borderColor: "grey.200"
+              }}
+            >
+              <Typography fontSize="11px" fontWeight={700} color="text.secondary" textTransform="uppercase">
+                Pickup Address
+              </Typography>
+              <Typography fontSize="13px" fontWeight={600} color="text.primary" sx={{ mt: 0.2 }}>
+                {fromAddress || "Origin address"}
+              </Typography>
+              {isSameApartment && (pickupFlat || localStorage.getItem("pickupFlat")) && (
+                <Typography fontSize="12px" fontWeight={700} color="primary.main" sx={{ mt: 0.4 }}>
+                  🏢 Pickup Flat / Tower: {pickupFlat || localStorage.getItem("pickupFlat")}
                 </Typography>
+              )}
+            </Box>
 
-                <Grid container spacing={1.25}>
-                  {timeSlots
-                    ?.filter((slot) => slot.timeSlotName.includes(period))
-                    .map((slot) => {
-                      const { hour } = parseTime(slot.timeSlotName);
-                      const isSelected = selectedTimeSlot === slot.timeSlotID;
+            {/* Lift Question Cards */}
+            <Typography fontWeight={700} fontSize="13.5px" color="text.primary" sx={{ mb: 1.25 }}>
+              Is a service elevator / lift available at pickup?
+            </Typography>
 
+            <Grid container spacing={1.5} sx={{ mb: 3 }}>
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handlePickupLiftChange("yes")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: serviceLift === "yes" ? "#16a34a" : "grey.200",
+                    bgcolor: serviceLift === "yes" ? "rgba(22, 163, 74, 0.05)" : "white",
+                    boxShadow: serviceLift === "yes" ? "0 4px 14px rgba(22, 163, 74, 0.15)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "#16a34a" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: serviceLift === "yes" ? "#16a34a" : "grey.100",
+                      color: serviceLift === "yes" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <Elevator fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      Yes, Lift Available
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Elevator is accessible for shifting crew
+                    </Typography>
+                  </Box>
+                  {serviceLift === "yes" && <CheckCircle sx={{ color: "#16a34a", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handlePickupLiftChange("no")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: serviceLift === "no" ? "#dc2626" : "grey.200",
+                    bgcolor: serviceLift === "no" ? "rgba(220, 38, 38, 0.04)" : "white",
+                    boxShadow: serviceLift === "no" ? "0 4px 14px rgba(220, 38, 38, 0.15)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "#dc2626" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: serviceLift === "no" ? "#dc2626" : "grey.100",
+                      color: serviceLift === "no" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <StairsOutlined fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      No Lift (Stairs Only)
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Manual staircase carry required
+                    </Typography>
+                  </Box>
+                  {serviceLift === "no" && <CheckCircle sx={{ color: "#dc2626", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* Floor Selection */}
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.25 }}>
+                <Typography fontWeight={700} fontSize="13.5px" color="text.primary">
+                  Select Pickup Floor:
+                </Typography>
+                <Typography fontSize="12px" fontWeight={700} color="primary.main">
+                  {selectedFloor === 0
+                    ? "Ground Floor"
+                    : selectedFloor
+                    ? `Floor ${selectedFloor}`
+                    : "None selected"}
+                </Typography>
+              </Box>
+
+              {/* Quick Floor Chips */}
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  overflowX: "auto",
+                  pb: 1,
+                  mb: 1.5,
+                  "&::-webkit-scrollbar": { height: 5 },
+                  "&::-webkit-scrollbar-thumb": { bgcolor: "grey.300", borderRadius: 3 }
+                }}
+              >
+                {quickFloors.map((fl) => {
+                  const isSelected = selectedFloor === fl;
+                  return (
+                    <Chip
+                      key={fl}
+                      label={fl === 0 ? "Ground" : `Floor ${fl}`}
+                      onClick={() => handlePickupFloorSelect(fl)}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        px: 0.5,
+                        py: 2,
+                        borderRadius: 2,
+                        cursor: "pointer",
+                        border: "1.5px solid",
+                        borderColor: isSelected ? "primary.main" : "grey.200",
+                        bgcolor: isSelected ? "primary.main" : "white",
+                        color: isSelected ? "white" : "text.primary",
+                        "&:hover": {
+                          borderColor: "primary.main",
+                          bgcolor: isSelected ? "primary.dark" : "rgba(79, 70, 229, 0.05)"
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+
+              {/* Higher Floor Dropdown (Floors 11 to 50) */}
+              <Box sx={{ maxWidth: 260 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="pickup-higher-floor-label" sx={{ fontSize: "12.5px" }}>
+                    Higher Floor (11 to 50)
+                  </InputLabel>
+                  <Select
+                    labelId="pickup-higher-floor-label"
+                    label="Higher Floor (11 to 50)"
+                    value={selectedFloor > 10 ? selectedFloor : ""}
+                    onChange={(e) => handlePickupFloorSelect(e.target.value)}
+                    sx={{ borderRadius: 2, fontSize: "13px" }}
+                  >
+                    {[...Array(40)].map((_, i) => {
+                      const fl = i + 11;
                       return (
-                        <Grid item xs={3} sm={2} md={1.5} key={slot.timeSlotID}>
+                        <MenuItem key={fl} value={fl} sx={{ fontSize: "13px" }}>
+                          Floor {fl}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* SECTION 3: DROP DESTINATION LOCATION & ELEVATOR */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: 3.5,
+              border: "1.5px solid",
+              borderColor: "grey.200",
+              bgcolor: "white",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.04)"
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(220, 38, 38, 0.12)",
+                  color: "#dc2626",
+                  width: 40,
+                  height: 40,
+                  fontWeight: 800
+                }}
+              >
+                <LocationOn fontSize="small" />
+              </Avatar>
+              <Box>
+                <Typography variant="h6" fontWeight={800} fontSize="17px" color="text.primary">
+                  Drop-off Location & Access
+                </Typography>
+                <Typography fontSize="12.5px" color="text.secondary">
+                  Specify elevator availability and floor height at destination
+                </Typography>
+              </Box>
+            </Stack>
+
+            {/* Address Info Chip */}
+            <Box
+              sx={{
+                p: 1.5,
+                mb: 2.5,
+                borderRadius: 2.5,
+                bgcolor: "grey.50",
+                border: "1px solid",
+                borderColor: "grey.200"
+              }}
+            >
+              <Typography fontSize="11px" fontWeight={700} color="text.secondary" textTransform="uppercase">
+                Drop-off Address
+              </Typography>
+              <Typography fontSize="13px" fontWeight={600} color="text.primary" sx={{ mt: 0.2 }}>
+                {toAddress || "Destination address"}
+              </Typography>
+              {isSameApartment && (dropFlat || localStorage.getItem("dropFlat")) && (
+                <Typography fontSize="12px" fontWeight={700} color="primary.main" sx={{ mt: 0.4 }}>
+                  🏢 Drop Flat / Tower: {dropFlat || localStorage.getItem("dropFlat")}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Lift Question Cards */}
+            <Typography fontWeight={700} fontSize="13.5px" color="text.primary" sx={{ mb: 1.25 }}>
+              Is a service elevator / lift available at drop-off?
+            </Typography>
+
+            <Grid container spacing={1.5} sx={{ mb: 3 }}>
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handleDropLiftChange("yes")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: serviceLiftdrop === "yes" ? "#16a34a" : "grey.200",
+                    bgcolor: serviceLiftdrop === "yes" ? "rgba(22, 163, 74, 0.05)" : "white",
+                    boxShadow: serviceLiftdrop === "yes" ? "0 4px 14px rgba(22, 163, 74, 0.15)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "#16a34a" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: serviceLiftdrop === "yes" ? "#16a34a" : "grey.100",
+                      color: serviceLiftdrop === "yes" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <Elevator fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      Yes, Lift Available
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Elevator is accessible for shifting crew
+                    </Typography>
+                  </Box>
+                  {serviceLiftdrop === "yes" && <CheckCircle sx={{ color: "#16a34a", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handleDropLiftChange("no")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: serviceLiftdrop === "no" ? "#dc2626" : "grey.200",
+                    bgcolor: serviceLiftdrop === "no" ? "rgba(220, 38, 38, 0.04)" : "white",
+                    boxShadow: serviceLiftdrop === "no" ? "0 4px 14px rgba(220, 38, 38, 0.15)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "#dc2626" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: serviceLiftdrop === "no" ? "#dc2626" : "grey.100",
+                      color: serviceLiftdrop === "no" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <StairsOutlined fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      No Lift (Stairs Only)
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Manual staircase carry required
+                    </Typography>
+                  </Box>
+                  {serviceLiftdrop === "no" && <CheckCircle sx={{ color: "#dc2626", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* Floor Selection */}
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.25 }}>
+                <Typography fontWeight={700} fontSize="13.5px" color="text.primary">
+                  Select Drop-off Floor:
+                </Typography>
+                <Typography fontSize="12px" fontWeight={700} color="primary.main">
+                  {floordrop === 0
+                    ? "Ground Floor"
+                    : floordrop
+                    ? `Floor ${floordrop}`
+                    : "None selected"}
+                </Typography>
+              </Box>
+
+              {/* Quick Floor Chips */}
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  overflowX: "auto",
+                  pb: 1,
+                  mb: 1.5,
+                  "&::-webkit-scrollbar": { height: 5 },
+                  "&::-webkit-scrollbar-thumb": { bgcolor: "grey.300", borderRadius: 3 }
+                }}
+              >
+                {quickFloors.map((fl) => {
+                  const isSelected = floordrop === fl;
+                  return (
+                    <Chip
+                      key={fl}
+                      label={fl === 0 ? "Ground" : `Floor ${fl}`}
+                      onClick={() => handleDropFloorSelect(fl)}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        px: 0.5,
+                        py: 2,
+                        borderRadius: 2,
+                        cursor: "pointer",
+                        border: "1.5px solid",
+                        borderColor: isSelected ? "primary.main" : "grey.200",
+                        bgcolor: isSelected ? "primary.main" : "white",
+                        color: isSelected ? "white" : "text.primary",
+                        "&:hover": {
+                          borderColor: "primary.main",
+                          bgcolor: isSelected ? "primary.dark" : "rgba(79, 70, 229, 0.05)"
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+
+              {/* Higher Floor Dropdown (Floors 11 to 50) */}
+              <Box sx={{ maxWidth: 260 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="drop-higher-floor-label" sx={{ fontSize: "12.5px" }}>
+                    Higher Floor (11 to 50)
+                  </InputLabel>
+                  <Select
+                    labelId="drop-higher-floor-label"
+                    label="Higher Floor (11 to 50)"
+                    value={floordrop > 10 ? floordrop : ""}
+                    onChange={(e) => handleDropFloorSelect(e.target.value)}
+                    sx={{ borderRadius: 2, fontSize: "13px" }}
+                  >
+                    {[...Array(40)].map((_, i) => {
+                      const fl = i + 11;
+                      return (
+                        <MenuItem key={fl} value={fl} sx={{ fontSize: "13px" }}>
+                          Floor {fl}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* SECTION 4: VEHICLE & DOORSTEP ACCESSIBILITY */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: 3.5,
+              border: "1.5px solid",
+              borderColor: "grey.200",
+              bgcolor: "white",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.04)"
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(245, 158, 11, 0.12)",
+                  color: "#d97706",
+                  width: 40,
+                  height: 40,
+                  fontWeight: 800
+                }}
+              >
+                <LocalShippingOutlined fontSize="small" />
+              </Avatar>
+              <Box>
+                <Typography variant="h6" fontWeight={800} fontSize="17px" color="text.primary">
+                  Moving Truck Doorstep Accessibility
+                </Typography>
+                <Typography fontSize="12.5px" color="text.secondary">
+                  Can our vehicle park directly near the building entrance or gate?
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Grid container spacing={1.5} sx={{ mb: 2 }}>
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handleVanAccessChange("yes")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: vanAccessible === "yes" ? "primary.main" : "grey.200",
+                    bgcolor: vanAccessible === "yes" ? "rgba(79, 70, 229, 0.05)" : "white",
+                    boxShadow: vanAccessible === "yes" ? "0 4px 14px rgba(79, 70, 229, 0.18)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "primary.main" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: vanAccessible === "yes" ? "primary.main" : "grey.100",
+                      color: vanAccessible === "yes" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <LocalShippingOutlined fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      Yes, Direct Access
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Truck parks directly outside entrance
+                    </Typography>
+                  </Box>
+                  {vanAccessible === "yes" && <CheckCircle sx={{ color: "primary.main", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Paper
+                  onClick={() => handleVanAccessChange("no")}
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1.5px solid",
+                    borderColor: vanAccessible === "no" ? "#d97706" : "grey.200",
+                    bgcolor: vanAccessible === "no" ? "rgba(245, 158, 11, 0.05)" : "white",
+                    boxShadow: vanAccessible === "no" ? "0 4px 14px rgba(245, 158, 11, 0.18)" : "none",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    "&:hover": { borderColor: "#d97706" }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: vanAccessible === "no" ? "#d97706" : "grey.100",
+                      color: vanAccessible === "no" ? "white" : "grey.600",
+                      width: 38,
+                      height: 38
+                    }}
+                  >
+                    <DirectionsWalk fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontWeight={700} fontSize="14px" color="text.primary">
+                      No (Walk Distance)
+                    </Typography>
+                    <Typography fontSize="11.5px" color="text.secondary">
+                      Truck parked away (narrow lane/gate)
+                    </Typography>
+                  </Box>
+                  {vanAccessible === "no" && <CheckCircle sx={{ color: "#d97706", fontSize: 20 }} />}
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* If vehicle cannot park near entrance, show distance options */}
+            {vanAccessible === "no" && (
+              <Fade in>
+                <Box
+                  sx={{
+                    mt: 2.5,
+                    p: 2.2,
+                    borderRadius: 3,
+                    bgcolor: "grey.50",
+                    border: "1px dashed",
+                    borderColor: "grey.300"
+                  }}
+                >
+                  <Typography fontWeight={700} fontSize="13px" color="text.primary" sx={{ mb: 1.25 }}>
+                    Approximate walking carry distance from road/truck to door:
+                  </Typography>
+
+                  <Grid container spacing={1.25}>
+                    {["0-50m", "0-100m", "0-150m", "0-200m"].map((distOption) => {
+                      const isDistSelected = roadDistance === distOption;
+                      return (
+                        <Grid item xs={6} sm={3} key={distOption}>
                           <Paper
-                            onClick={() => handleTimeSlotChange(slot.timeSlotID)}
+                            onClick={() => handleRoadDistanceSelect(distOption)}
                             elevation={0}
                             sx={{
-                              width: 58,
-                              height: 58,
-                              borderRadius: "50%",
+                              p: 1.2,
+                              borderRadius: 2,
+                              textAlign: "center",
                               cursor: "pointer",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              border: isSelected ? "2px solid #4f46e5" : "1.5px solid #e5e7eb",
-                              background: isSelected
-                                ? "linear-gradient(135deg, #eef2ff, #e0e7ff)"
-                                : "#fff",
-                              boxShadow: isSelected ? "0 4px 12px rgba(79, 70, 229, 0.25)" : "none",
-                              transition: "all 0.2s ease",
-                              "&:hover": {
-                                boxShadow: "0 4px 12px rgba(79, 70, 229, 0.18)",
-                                borderColor: "primary.main",
-                                transform: "translateY(-1px)"
-                              }
+                              border: "1.5px solid",
+                              borderColor: isDistSelected ? "#d97706" : "grey.200",
+                              bgcolor: isDistSelected ? "rgba(245, 158, 11, 0.1)" : "white",
+                              color: isDistSelected ? "#d97706" : "text.primary",
+                              fontWeight: 700,
+                              fontSize: "13px",
+                              transition: "all 0.15s ease",
+                              "&:hover": { borderColor: "#d97706" }
                             }}
                           >
-                            <AccessTime
-                              sx={{
-                                fontSize: 15,
-                                mb: 0,
-                                color: isSelected ? "primary.main" : "text.secondary"
-                              }}
-                            />
-                            <Typography fontWeight={700} fontSize={13} lineHeight={1.3} color={isSelected ? "primary.main" : "text.primary"}>
-                              {hour}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              fontSize={9}
-                              lineHeight={1}
-                              color={isSelected ? "primary.main" : "text.secondary"}
-                            >
-                              {period}
-                            </Typography>
+                            {distOption}
                           </Paper>
                         </Grid>
                       );
                     })}
-                </Grid>
-              </Box>
-            ))}
-          </Paper>
-
-          {/* PICKUP */}
-          <Paper
-            elevation={0}
-            sx={{ p: 2.75, borderRadius: 3, border: "1px solid", borderColor: "grey.200" }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 0.5 }}>
-              <Avatar sx={{ bgcolor: "success.50", color: "success.main", width: 36, height: 36 }}>
-                <Elevator fontSize="small" />
-              </Avatar>
-              <Typography variant="h6" fontWeight={700} fontSize="16.5px">
-                Pickup location
-              </Typography>
-            </Stack>
-
-            <Typography sx={{ mt: 2, mb: 1, fontWeight: 600, fontSize: "13.5px", color: "text.secondary" }}>
-              Service lift available?
-            </Typography>
-
-            <ToggleButtonGroup
-              exclusive
-              fullWidth
-              value={serviceLift}
-              onChange={handlePickupLiftChange}
-            >
-              <ToggleButton value="yes" sx={toggleStyle}>
-                Yes
-              </ToggleButton>
-              <ToggleButton value="no" sx={toggleStyle}>
-                No
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            {
-              <Box sx={{ mt: 2.5 }}>
-                <Typography fontWeight={600} fontSize="13.5px" color="text.secondary" mb={1}>
-                  Select pickup floor
-                </Typography>
-
-                <Box
-                  sx={{
-                    maxHeight: 170,
-                    overflowY: "auto",
-                    border: "1.5px solid",
-                    borderColor: "grey.200",
-                    borderRadius: 2,
-                    py: 0.5
-                  }}
-                >
-                  <List disablePadding>
-                    <ListItemButton
-                      selected={selectedFloor === 0}
-                      onClick={() => handlePickupFloorSelect(0)}
-                      sx={floorListItemStyle}
-                    >
-                      <ListItemText primary="Ground Floor" primaryTypographyProps={{ fontSize: "13.5px", fontWeight: 500 }} />
-                    </ListItemButton>
-
-                    {[...Array(50)].map((_, i) => (
-                      <ListItemButton
-                        key={i}
-                        selected={selectedFloor === i + 1}
-                        onClick={() => handlePickupFloorSelect(i + 1)}
-                        sx={floorListItemStyle}
-                      >
-                        <ListItemText primary={`Floor ${i + 1}`} primaryTypographyProps={{ fontSize: "13.5px", fontWeight: 500 }} />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                </Box>
-              </Box>
-            }
-          </Paper>
-
-          {/* DROP */}
-          <Paper
-            elevation={0}
-            sx={{ p: 2.75, borderRadius: 3, border: "1px solid", borderColor: "grey.200" }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 0.5 }}>
-              <Avatar sx={{ bgcolor: "error.50", color: "error.main", width: 36, height: 36 }}>
-                <Elevator fontSize="small" />
-              </Avatar>
-              <Typography variant="h6" fontWeight={700} fontSize="16.5px">
-                Drop location
-              </Typography>
-            </Stack>
-
-            <Typography sx={{ mt: 2, mb: 1, fontWeight: 600, fontSize: "13.5px", color: "text.secondary" }}>
-              Service lift available?
-            </Typography>
-
-            <ToggleButtonGroup
-              exclusive
-              fullWidth
-              value={serviceLiftdrop}
-              onChange={handleDropLiftChange}
-            >
-              <ToggleButton value="yes" sx={toggleStyle}>
-                Yes
-              </ToggleButton>
-              <ToggleButton value="no" sx={toggleStyle}>
-                No
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            {
-              <Box sx={{ mt: 2.5 }}>
-                <Typography fontWeight={600} fontSize="13.5px" color="text.secondary" mb={1}>
-                  Select drop floor
-                </Typography>
-
-                <Box
-                  sx={{
-                    maxHeight: 170,
-                    overflowY: "auto",
-                    border: "1.5px solid",
-                    borderColor: "grey.200",
-                    borderRadius: 2,
-                    py: 0.5
-                  }}
-                >
-                  <List disablePadding>
-                    <ListItemButton
-                      selected={floordrop === 0}
-                      onClick={() => handleDropFloorSelect(0)}
-                      sx={floorListItemStyle}
-                    >
-                      <ListItemText primary="Ground Floor" primaryTypographyProps={{ fontSize: "13.5px", fontWeight: 500 }} />
-                    </ListItemButton>
-
-                    {[...Array(50)].map((_, i) => (
-                      <ListItemButton
-                        key={i}
-                        selected={floordrop === i + 1}
-                        onClick={() => handleDropFloorSelect(i + 1)}
-                        sx={floorListItemStyle}
-                      >
-                        <ListItemText primary={`Floor ${i + 1}`} primaryTypographyProps={{ fontSize: "13.5px", fontWeight: 500 }} />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                </Box>
-              </Box>
-            }
-          </Paper>
-
-          {/* VAN ACCESS */}
-          <Paper
-            elevation={0}
-            sx={{ p: 2.75, borderRadius: 3, border: "1px solid", borderColor: "grey.200" }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <Avatar sx={{ bgcolor: "warning.50", color: "warning.main", width: 36, height: 36 }}>
-                <DirectionsCar fontSize="small" />
-              </Avatar>
-              <Typography fontWeight={700} fontSize="16.5px">
-                Van accessible to door?
-              </Typography>
-            </Stack>
-
-            <ToggleButtonGroup
-              exclusive
-              fullWidth
-              value={vanAccessible}
-              onChange={handleVanAccessChange}
-            >
-              <ToggleButton value="yes" sx={toggleStyle}>
-                Yes
-              </ToggleButton>
-              <ToggleButton value="no" sx={toggleStyle}>
-                No
-              </ToggleButton>
-            </ToggleButtonGroup>
-            {vanAccessible === "no" && (
-              <Fade in>
-                <Box sx={{ mt: 2.5 }}>
-                  <Typography fontWeight={600} fontSize="13.5px" color="text.secondary" mb={1}>
-                    Approximate distance from road
-                  </Typography>
-                  <Grid container spacing={1.25}>
-                    {["0-50m", "0-100m", "0-150m", "0-200m"].map((d) => (
-                      <Grid item xs={6} key={d}>
-                        <ToggleButton
-                          value={d}
-                          fullWidth
-                          size="small"
-                          sx={toggleStyle}
-                          selected={roadDistance === d}
-                          onChange={() => handleRoadDistanceSelect(d)}
-                        >
-                          {d}
-                        </ToggleButton>
-                      </Grid>
-                    ))}
                   </Grid>
+
                   <TextField
                     fullWidth
                     multiline
                     rows={2}
+                    placeholder="Provide additional access instructions (e.g., basement clearance height, parking restriction, gate security procedure)..."
+                    value={roadDetails || ""}
+                    onChange={handleRoadDetailsChange}
                     sx={{
                       mt: 2,
-                      "& .MuiOutlinedInput-root": { borderRadius: 2 }
+                      bgcolor: "white",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2.5,
+                        fontSize: "13px"
+                      }
                     }}
-                    placeholder="Additional details"
-                    value={roadDetails}
-                    onChange={handleRoadDetailsChange}
                   />
                 </Box>
               </Fade>
@@ -521,189 +1005,265 @@ const Step2_ServiceOptions = ({
         </Stack>
       </Grid>
 
-      {/* RIGHT SECTION — SUMMARY SIDEBAR */}
+      {/* RIGHT COLUMN: SERVICE SUMMARY SIDEBAR */}
       <Grid item xs={12} lg={4}>
         <Paper
           elevation={0}
           sx={{
-            p: 2.75,
-            position: "sticky",
-            top: 20,
-            borderRadius: 3,
-            border: "1px solid",
+            p: 3,
+            position: { lg: "sticky", xs: "static" },
+            top: 24,
+            borderRadius: 3.5,
+            border: "1.5px solid",
             borderColor: "grey.200",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
+            bgcolor: "white",
+            boxShadow: "0 10px 30px -10px rgba(15, 23, 42, 0.08)"
           }}
         >
-          <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1 }}>
-            <Avatar sx={{ bgcolor: "primary.50", color: "primary.main", width: 36, height: 36 }}>
+          {/* Header */}
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+            <Avatar
+              sx={{
+                background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",
+                color: "white",
+                width: 38,
+                height: 38
+              }}
+            >
               <ApartmentOutlined fontSize="small" />
             </Avatar>
-            <Typography variant="h6" fontWeight={700} fontSize="16.5px">
-              Service summary
-            </Typography>
-          </Stack>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Stack spacing={1.75}>
-            <Box sx={{ display: "flex", gap: 1.25 }}>
-              <LocationOn sx={{ fontSize: 19, color: "success.main", mt: 0.2 }} />
-              <Box>
-                <Typography fontSize="11.5px" fontWeight={700} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                  Pickup address
-                </Typography>
-                <Typography fontSize="13.5px" sx={{ mt: 0.25 }}>
-                  {fromAddress}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1.25 }}>
-              <LocationOn sx={{ fontSize: 19, color: "error.main", mt: 0.2 }} />
-              <Box>
-                <Typography fontSize="11.5px" fontWeight={700} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                  Drop-off address
-                </Typography>
-                <Typography fontSize="13.5px" sx={{ mt: 0.25 }}>
-                  {toAddress}
-                </Typography>
-              </Box>
+            <Box>
+              <Typography variant="h6" fontWeight={800} fontSize="16.5px" color="text.primary">
+                Service Summary
+              </Typography>
+              <Typography fontSize="12px" color="text.secondary">
+                Configuration for move confirmation
+              </Typography>
             </Box>
           </Stack>
 
-          {/* <Typography>
-            Pickup floor charge: ₹{pickupFloorCharge}
-          </Typography>
+          {/* Quick Metrics (CFT & Items from Step 1) */}
+          <Box
+            sx={{
+              p: 1.5,
+              mb: 2.5,
+              borderRadius: 2.5,
+              bgcolor: "rgba(79, 70, 229, 0.04)",
+              border: "1px solid",
+              borderColor: "rgba(79, 70, 229, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}
+          >
+            <Box>
+              <Typography fontSize="10.5px" fontWeight={700} color="text.secondary">
+                SELECTED INVENTORY
+              </Typography>
+              <Typography fontSize="14px" fontWeight={800} color="primary.main">
+                {(bookingData.selectedItems || []).length} Items ({totalCFT.toFixed(1)} CFT)
+              </Typography>
+            </Box>
+            <Chip
+              label="Ready"
+              size="small"
+              sx={{
+                bgcolor: "rgba(22, 163, 74, 0.1)",
+                color: "#16a34a",
+                fontWeight: 800,
+                fontSize: "11px"
+              }}
+            />
+          </Box>
 
-          <Typography>
-            Drop floor charge: ₹{dropFloorCharge}
-          </Typography> */}
+          <Divider sx={{ mb: 2 }} />
 
-          <Divider sx={{ my: 2 }} />
+          {/* ROUTE SUMMARY */}
+          <Stack spacing={1.8} sx={{ mb: 2.5 }}>
+            {/* Origin */}
+            <Box sx={{ display: "flex", gap: 1.25 }}>
+              <LocationOn sx={{ fontSize: 20, color: "#16a34a", mt: 0.2 }} />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography fontSize="11px" fontWeight={800} color="#16a34a" textTransform="uppercase">
+                  Origin (Pickup)
+                </Typography>
+                <Typography fontSize="12.5px" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.3, mt: 0.2 }}>
+                  {fromAddress || "Not specified"}
+                </Typography>
+                {isSameApartment && (pickupFlat || localStorage.getItem("pickupFlat")) && (
+                  <Typography fontSize="11.5px" fontWeight={700} color="primary.main" sx={{ mt: 0.3 }}>
+                    Flat / Tower: {pickupFlat || localStorage.getItem("pickupFlat")}
+                  </Typography>
+                )}
+                <Stack direction="row" spacing={0.8} sx={{ mt: 0.5 }}>
+                  <Chip
+                    size="small"
+                    label={selectedFloor === 0 ? "Ground Floor" : selectedFloor ? `Floor ${selectedFloor}` : "Floor unselected"}
+                    sx={{ fontSize: "10.5px", height: 22, fontWeight: 700 }}
+                  />
+                  <Chip
+                    size="small"
+                    label={serviceLift === "yes" ? "Lift Yes" : serviceLift === "no" ? "Stairs Only" : "Lift unselected"}
+                    sx={{
+                      fontSize: "10.5px",
+                      height: 22,
+                      fontWeight: 700,
+                      bgcolor: serviceLift === "yes" ? "rgba(22, 163, 74, 0.1)" : serviceLift === "no" ? "rgba(220, 38, 38, 0.1)" : "grey.100",
+                      color: serviceLift === "yes" ? "#16a34a" : serviceLift === "no" ? "#dc2626" : "text.secondary"
+                    }}
+                  />
+                </Stack>
+              </Box>
+            </Box>
 
-          <Stack spacing={1.25}>
-            {pickupLiftCharge > 0 && (
-              <Chip
-                icon={<Cancel sx={{ fontSize: 16 }} />}
-                label="Lift available at pickup location: No"
-                size="small"
-                sx={{
-                  justifyContent: "flex-start",
-                  bgcolor: "error.50",
-                  color: "error.main",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  py: 1.8,
-                  "& .MuiChip-icon": { color: "error.main" }
-                }}
-              />
-            )}
+            {/* Destination */}
+            <Box sx={{ display: "flex", gap: 1.25 }}>
+              <LocationOn sx={{ fontSize: 20, color: "#dc2626", mt: 0.2 }} />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography fontSize="11px" fontWeight={800} color="#dc2626" textTransform="uppercase">
+                  Destination (Drop-off)
+                </Typography>
+                <Typography fontSize="12.5px" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.3, mt: 0.2 }}>
+                  {toAddress || "Not specified"}
+                </Typography>
+                {isSameApartment && (dropFlat || localStorage.getItem("dropFlat")) && (
+                  <Typography fontSize="11.5px" fontWeight={700} color="primary.main" sx={{ mt: 0.3 }}>
+                    Flat / Tower: {dropFlat || localStorage.getItem("dropFlat")}
+                  </Typography>
+                )}
+                <Stack direction="row" spacing={0.8} sx={{ mt: 0.5 }}>
+                  <Chip
+                    size="small"
+                    label={floordrop === 0 ? "Ground Floor" : floordrop ? `Floor ${floordrop}` : "Floor unselected"}
+                    sx={{ fontSize: "10.5px", height: 22, fontWeight: 700 }}
+                  />
+                  <Chip
+                    size="small"
+                    label={serviceLiftdrop === "yes" ? "Lift Yes" : serviceLiftdrop === "no" ? "Stairs Only" : "Lift unselected"}
+                    sx={{
+                      fontSize: "10.5px",
+                      height: 22,
+                      fontWeight: 700,
+                      bgcolor: serviceLiftdrop === "yes" ? "rgba(22, 163, 74, 0.1)" : serviceLiftdrop === "no" ? "rgba(220, 38, 38, 0.1)" : "grey.100",
+                      color: serviceLiftdrop === "yes" ? "#16a34a" : serviceLiftdrop === "no" ? "#dc2626" : "text.secondary"
+                    }}
+                  />
+                </Stack>
+              </Box>
+            </Box>
+          </Stack>
 
-            {pickupLiftCharge == 0 && (
-              <Chip
-                icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                label="Lift available at pickup location: Yes"
-                size="small"
+          <Divider sx={{ mb: 2 }} />
+
+          {/* TIME & ACCESS DETAILS */}
+          <Stack spacing={1.25} sx={{ mb: 2.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography fontSize="12px" color="text.secondary">
+                Pickup Slot:
+              </Typography>
+              <Typography fontSize="12.5px" fontWeight={700} color={selectedTimeSlot ? "primary.main" : "text.disabled"}>
+                {selectedTimeSlot ? selectedTimeSlotLabel : "Pending selection"}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography fontSize="12px" color="text.secondary">
+                Truck Access:
+              </Typography>
+              <Typography fontSize="12.5px" fontWeight={700} color={vanAccessible ? "text.primary" : "text.disabled"}>
+                {vanAccessible === "yes"
+                  ? "Direct Doorstep"
+                  : vanAccessible === "no"
+                  ? `Walk: ${roadDistance || "Distance unselected"}`
+                  : "Pending selection"}
+              </Typography>
+            </Box>
+
+            {totalExtraCharge > 0 && (
+              <Box
                 sx={{
-                  justifyContent: "flex-start",
-                  bgcolor: "success.50",
-                  color: "success.main",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  py: 1.8,
-                  "& .MuiChip-icon": { color: "success.main" }
+                  p: 1.25,
+                  mt: 1,
+                  borderRadius: 2,
+                  bgcolor: "grey.50",
+                  border: "1px solid",
+                  borderColor: "grey.200"
                 }}
-              />
-            )}
-            {dropLiftCharge > 0 && (
-              <Chip
-                icon={<Cancel sx={{ fontSize: 16 }} />}
-                label="Lift available at drop-off location: No"
-                size="small"
-                sx={{
-                  justifyContent: "flex-start",
-                  bgcolor: "error.50",
-                  color: "error.main",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  py: 1.8,
-                  "& .MuiChip-icon": { color: "error.main" }
-                }}
-              />
-            )}
-            {dropLiftCharge == 0 && (
-              <Chip
-                icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                label="Lift available at drop-off location: Yes"
-                size="small"
-                sx={{
-                  justifyContent: "flex-start",
-                  bgcolor: "success.50",
-                  color: "success.main",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  py: 1.8,
-                  "& .MuiChip-icon": { color: "success.main" }
-                }}
-              />
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.4 }}>
+                  <Typography fontSize="11.5px" color="text.secondary">
+                    Extra service charges:
+                  </Typography>
+                  <Typography fontSize="12px" fontWeight={800} color="primary.main">
+                    ₹{totalExtraCharge}
+                  </Typography>
+                </Box>
+                <Typography fontSize="10px" color="text.disabled">
+                  Includes floor carry & manual walking assistance
+                </Typography>
+              </Box>
             )}
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
-
-          {/* <Typography fontWeight={700}>
-            Total extra charge: ₹{totalExtraCharge}
-          </Typography> */}
-
-          <Stack spacing={1.25} sx={{ mt: 3 }}>
+          {/* ACTION BUTTONS */}
+          <Stack spacing={1.5}>
             <Button
               fullWidth
               variant="contained"
               onClick={onNext}
-              disabled={isNextDisabled}
+              disabled={isNextDisabled || loading}
+              endIcon={<ArrowForward />}
               sx={{
-                py: 1.3,
-                borderRadius: 2,
-                fontWeight: 700,
+                py: 1.4,
+                borderRadius: 2.5,
+                fontWeight: 800,
                 fontSize: "14px",
                 textTransform: "none",
-                boxShadow: "0 4px 14px rgba(79, 70, 229, 0.3)",
-                background: "linear-gradient(135deg, #4f46e5, #6366f1)",
+                boxShadow: "0 6px 20px rgba(79, 70, 229, 0.35)",
+                background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #4338ca, #4f46e5)",
-                  boxShadow: "0 6px 18px rgba(79, 70, 229, 0.4)"
+                  background: "linear-gradient(135deg, #4338ca 0%, #4f46e5 100%)",
+                  boxShadow: "0 8px 24px rgba(79, 70, 229, 0.45)"
                 },
                 "&.Mui-disabled": {
-                  background: "grey.200",
-                  color: "grey.400"
+                  bgcolor: "grey.200",
+                  color: "grey.400",
+                  boxShadow: "none"
                 }
               }}
             >
-              Service confirmation
+              Continue to Review & Payment
             </Button>
+
             <Button
               fullWidth
               variant="outlined"
               onClick={onBack}
+              startIcon={<ArrowBack />}
               sx={{
-                py: 1.2,
-                borderRadius: 2,
-                fontWeight: 600,
-                fontSize: "13.5px",
+                py: 1.1,
+                borderRadius: 2.5,
+                fontWeight: 700,
+                fontSize: "13px",
                 textTransform: "none",
                 borderColor: "grey.300",
                 color: "text.secondary",
                 "&:hover": {
                   borderColor: "primary.main",
                   color: "primary.main",
-                  bgcolor: "primary.50"
+                  bgcolor: "rgba(79, 70, 229, 0.04)"
                 }
               }}
             >
-              Back to item selection page
+              Back to Item Selection
             </Button>
           </Stack>
+
+          {isNextDisabled && (
+            <Typography fontSize="11px" color="text.disabled" textAlign="center" sx={{ mt: 1.5 }}>
+              * Please select a pickup time slot and doorstep access to proceed.
+            </Typography>
+          )}
         </Paper>
       </Grid>
     </Grid>
